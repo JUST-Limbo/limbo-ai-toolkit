@@ -1,7 +1,7 @@
 ---
 name: git-branch-merge-flow
-description: Pushes the current branch, fetches origin, aligns the target branch with origin/target if behind, merges current into target, pushes target, then switches back on success. Stays on target without pushing on any merge conflict. Use when the user sends /git-branch-merge-flow or asks to merge the current branch into another branch.
-x-skill-version: 1.4.0
+description: Pushes the current branch, merges it into a user-specified target branch, pushes that target branch, then switches back when merge succeeds. Stays on the target branch without pushing if merge conflicts. Use when the user sends /git-branch-merge-flow or asks to merge the current branch into another branch.
+x-skill-version: 1.3.2
 ---
 
 # Git Branch Merge Flow
@@ -13,10 +13,9 @@ x-skill-version: 1.4.0
 本 Skill 用于把你在仓库里**当前所在分支**上的改动，按固定顺序同步到**另一个分支**（目标分支），并推送到远端。流程概括如下。
 
 1. 自动识别**当前分支**，若有未提交改动则先提交，再把当前分支推送到远端同名分支。
-2. 执行 `git fetch origin` 更新本地 `origin/*`（远端跟踪分支），**不**改变当前分支与工作区。
-3. 切换到**目标分支**；若本地目标分支落后于 `origin/<目标分支>`，先 `merge origin/<目标分支>` 与远端对齐，再把当前分支合并进目标分支。
-4. **合并成功**：推送目标分支到远端，再切回当前分支，并汇报结果。
-5. **合并冲突**（对齐远端或合并功能分支任一阶段）：立刻停止，列出冲突文件与阶段；**不切回**当前分支、**不推送**目标分支，留在目标分支上便于你本地解决冲突。
+2. 切换到**目标分支**，把当前分支合并进目标分支。
+3. **合并成功**：推送目标分支到远端，再切回当前分支，并汇报结果。
+4. **合并冲突**：立刻停止，列出冲突相关提示；**不切回**当前分支、**不推送**目标分支，留在目标分支上便于你本地解决冲突。
 
 其中「当前分支」与「目标分支」在下方英文步骤里分别对应 `CurrentBranch` 与 `TargetBranch`。
 
@@ -44,15 +43,6 @@ x-skill-version: 1.4.0
 - 提交说明应避免机械化表达，不要写“将 A 分支合并到 B 分支”这类不自然表述。
 - 若用户明确给出提交说明格式或文案，优先按用户要求执行。
 - 在 Windows PowerShell 中，避免用管道把中文直接传给 `git commit -F -`；请使用 UTF-8（无 BOM）临时文件传入 `-F`，以降低中文提交信息出现乱码（如 `??`）的概率。
-- `git push` 或 `git fetch` 失败时应立即停止，不继续 checkout 或 merge。
-
-### 合并前 fetch 说明
-
-- `git fetch origin` 只更新本地 `origin/*`，**不**改变当前分支与工作区。
-- 切换到 **TargetBranch** 后，若本地落后于 `origin/<TargetBranch>`，先 `merge origin/<TargetBranch>` 再 merge 功能分支。
-- **禁止**在 **CurrentBranch** 上执行 `git pull origin <TargetBranch>`（会把目标分支合进功能分支，方向反了）。
-- 本 Skill **不使用** `git pull`，以避免 `pull.rebase` 等配置改变合并行为。
-- 若 `origin/<TargetBranch>` 不存在（例如本地新建、尚未 push 的目标分支），跳过对齐步骤，直接 merge 功能分支。
 
 ## Instructions
 
@@ -60,26 +50,18 @@ Follow this workflow when the user provides the **目标分支** (target branch)
 
 1. Capture **当前分支** (current branch) as the branch that will be pushed and merged.
 2. Commit pending changes on the current branch (if there are changes), with a Chinese message that reflects the real file-level changes.
-3. Push the current branch to its same-named remote branch. **Stop immediately if push fails.**
-4. Run `git fetch origin` to update remote-tracking refs. **Stop immediately if fetch fails.**
-5. Switch to the target branch. **Stop immediately if checkout fails** (for example, branch does not exist locally).
-6. Align the target branch with `origin/<TargetBranch>` when applicable:
-   - If `origin/<TargetBranch>` does not exist, skip alignment.
-   - If local target is behind `origin/<TargetBranch>`, run `git merge origin/<TargetBranch>`.
-   - If local target is already up to date or ahead, skip merge alignment.
-   - If alignment merge conflicts, stop on the target branch; do not push; do not switch back.
-7. Merge the current branch into the target branch.
-8. If merge conflicts happen at any merge step:
+3. Push the current branch to its same-named remote branch.
+4. Switch to the target branch.
+5. Merge the current branch into the target branch.
+6. If merge conflicts happen:
    - Stop immediately.
-   - Report conflict phase: aligning `origin/<TargetBranch>` or merging `<CurrentBranch>`.
-   - List conflict files (for example via `git diff --name-only --diff-filter=U` or `git status --short`).
-   - Ask user to resolve or confirm resolution strategy.
+   - Clearly report conflict files and ask user to resolve or confirm resolution strategy.
    - Do not switch back to the current branch.
    - Do not push the target branch.
-9. If all steps succeed:
-   - Push the target branch to remote. **Stop immediately if push fails.**
+7. If merge succeeds:
+   - Push the target branch to remote.
    - Switch back to the current branch.
-   - Report success including fetch and target-alignment details.
+   - Report success.
 
 ## Command Workflow (Windows PowerShell)
 
@@ -111,7 +93,6 @@ if (-not $RepoIdentifier) {
 }
 
 # Commit on current branch only when there are staged/unstaged changes
-$HadNewCommit = $false
 if ((git status --porcelain).Length -gt 0) {
   # Use a Chinese commit message that is close to actual changed files/content.
   # Avoid robotic phrasing like "merge branch A into branch B" in commit message.
@@ -123,74 +104,26 @@ if ((git status --porcelain).Length -gt 0) {
   $Utf8NoBom = New-Object System.Text.UTF8Encoding $false
   [System.IO.File]::WriteAllText($CommitMsgFile, $CommitMessage, $Utf8NoBom)
   git commit -F $CommitMsgFile
-  if ($LASTEXITCODE -ne 0) { exit 1 }
   Remove-Item -Force $CommitMsgFile
-  $HadNewCommit = $true
 }
 
 # Push current branch to remote with the same name
 git push -u origin $CurrentBranch
-if ($LASTEXITCODE -ne 0) { exit 1 }
 
-# Fetch origin (updates origin/* only; does not change current branch)
-git fetch origin
-if ($LASTEXITCODE -ne 0) { exit 1 }
-
-# Switch to target branch
+# Switch to target branch and merge current branch into it
 git checkout $TargetBranch
-if ($LASTEXITCODE -ne 0) { exit 1 }
-
-# Align target branch with origin/<TargetBranch> when behind
-$RemoteRef = "origin/$TargetBranch"
-$TargetAligned = "skipped"
-$TargetAlignDetail = "远端不存在 $RemoteRef，跳过对齐"
-$ConflictPhase = ""
-
-git rev-parse $RemoteRef 2>$null
-$RemoteExists = ($LASTEXITCODE -eq 0)
-
-if ($RemoteExists) {
-  $Behind = [int](git rev-list --count "$TargetBranch..$RemoteRef")
-  $Ahead = [int](git rev-list --count "$RemoteRef..$TargetBranch")
-
-  if ($Behind -gt 0) {
-    git merge $RemoteRef
-    if ($LASTEXITCODE -ne 0) {
-      $ConflictPhase = "align-origin-target"
-      Write-Host "Merge conflict while aligning $TargetBranch with $RemoteRef. Stay on $TargetBranch and stop."
-      exit 1
-    }
-    $TargetAligned = "merged"
-    $TargetAlignDetail = "已 merge $RemoteRef（落后 $Behind 个提交）"
-  } else {
-    $TargetAligned = "none"
-    if ($Ahead -gt 0) {
-      $TargetAlignDetail = "本地领先 origin $Ahead 个提交，无需对齐"
-    } else {
-      $TargetAlignDetail = "已与 origin 一致"
-    }
-  }
-}
-
-$OriginTargetSha = ""
-if ($RemoteExists) {
-  $OriginTargetSha = git rev-parse --short $RemoteRef
-}
-
-# Merge current branch into target branch
 git merge $CurrentBranch
+
+# Conflict-aware behavior
 if ($LASTEXITCODE -ne 0) {
-  $ConflictPhase = "merge-current"
-  Write-Host "Merge conflict while merging $CurrentBranch into $TargetBranch. Stay on $TargetBranch and stop."
+  Write-Host "Merge conflict detected. Please resolve conflicts on branch $TargetBranch. Stay on $TargetBranch and stop workflow."
   exit 1
 }
 
 # Push target branch and switch back to current branch
 git push -u origin $TargetBranch
-if ($LASTEXITCODE -ne 0) { exit 1 }
-
 git checkout $CurrentBranch
-Write-Host "Done: pushed $CurrentBranch, fetched origin, aligned $TargetBranch ($TargetAligned), merged $CurrentBranch, pushed $TargetBranch, switched back to $CurrentBranch."
+Write-Host "Done: pushed $CurrentBranch, merged into $TargetBranch, pushed $TargetBranch, switched back to $CurrentBranch."
 Write-Host "涉及仓库：$RepoIdentifier"
 ```
 
@@ -200,9 +133,7 @@ Always report:
 
 - detected **当前分支** name and **目标分支** name
 - whether the current branch had a new commit before push
-- fetch status (executed or failed)
-- target alignment status (`none` / `merged` / `skipped`) with detail
-- feature-branch merge status
+- merge status
 - final branch after workflow
 - involved repository line in Chinese: `涉及仓库：\`<repo-identifier>\``
 - `<repo-identifier>` must be dynamically detected at runtime (for example from `git remote get-url origin`, or when unavailable, fallback to the git toplevel directory name); never hardcode a fixed repository name in this skill output.
@@ -215,19 +146,15 @@ Success case should follow this style:
 - 当前分支（CurrentBranch）：`<current-branch>`
 - 目标分支（TargetBranch）：`<target-branch>`
 - 当前分支是否先产生新提交：<是/否>
-- 新提交：`<commit-sha>`（`<commit-message>`）（若无则写「无」）
-- 合并前 fetch：已执行（origin/<target> @ <sha>）
-- 目标分支对齐：<none | merged | skipped>（<TargetAlignDetail>）
-- 功能分支合并：成功（<fast-forward | merge commit>，`<current-branch>` → `<target-branch>`）
+- 新提交：`<commit-sha>`（`<commit-message>`）
+- 合并状态：成功（`<target-branch>` fast-forward 合并 `<current-branch>`）
 - 最终所在分支：`<final-branch>`
 - 涉及仓库：`<repo-identifier>`
 
 已执行的关键动作：
 
 - 已将 `<current-branch>` 推送到远端
-- 已执行 `git fetch origin`
-- 已切换到 `<target-branch>` 并对齐 `origin/<target-branch>`（若需要）
-- 已合并 `<current-branch>` 到 `<target-branch>`
+- 已切换到 `<target-branch>` 并合并 `<current-branch>`
 - 已将 `<target-branch>` 推送到远端
 - 已切回 `<current-branch>` 分支
 ```
@@ -237,12 +164,10 @@ Conflict case report must explicitly state:
 - merge stopped on the **目标分支**
 - did not switch back to the **当前分支**
 - **目标分支** was not pushed
-- **冲突阶段**：对齐 `origin/<target>` 或 合并 `<current-branch>`
-- **冲突文件**：`<list>`
 
 ## Version Notes
 
-- Current effective version: `1.4.0`
+- Current effective version: `1.3.2`
 - Default behavior when user does not specify version: use this latest `SKILL.md`.
 - Historical snapshots should be kept under `versions/<version>/SKILL.md`.
 

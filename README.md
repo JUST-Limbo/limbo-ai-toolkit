@@ -14,7 +14,7 @@ rules/       可复用 Rule（编码规约、流程约束等）
 ### `git-branch-merge-flow`
 
 - 路径：[`skills/git-branch-merge-flow/`](skills/git-branch-merge-flow/SKILL.md)
-- 功能：将当前分支的改动按固定流程同步到目标分支（必要时先提交并推送当前分支），再合并并推送目标分支；若无冲突则切回之前的分支，若冲突则停止在目标分支等待处理。
+- 功能：将当前分支的改动按固定流程同步到目标分支（必要时先提交并推送当前分支）；合并前 `fetch origin`，在目标分支上与 `origin/<目标>` 对齐后再 merge，再推送目标分支；若无冲突则切回之前的分支，若冲突则停止在目标分支等待处理。
 - Use example：
 
 ```text
