@@ -31,6 +31,22 @@ rules/       可复用 Rule（编码规约、流程约束等）
 `rules/` 下存放可被其它项目复用的规则与编码规约，按语言/框架或主题切分。
 详见 [rules/README.md](rules/README.md)。
 
+### `agent-global-baseline`
+
+- 路径：[`rules/agent-global-baseline.md`](rules/agent-global-baseline.md)
+- 来源：`JUST-Limbo/limbo-ai-toolkit`（本仓库原创）
+- 作用域：**全局**（始终加载，不绑定文件 glob）
+- 功能：跨项目 Agent 全局基线（简体中文、代码原则、目录预检查、Git 临时 proxy 等）。**功能说明与取用方式**见 [rules/README.md](rules/README.md#agent-global-baseline)。
+- Use example：
+
+```text
+复制 agent-global-baseline.md（去掉 YAML 头）到 ~/.claude/CLAUDE.md
+```
+
+```text
+复制正文到 .cursor/rules/agent-global-baseline.mdc，设 alwaysApply: true
+```
+
 ---
 
 维护约定（含资产分类、版本规则、目录结构）见 [AGENTS.md](AGENTS.md)。
