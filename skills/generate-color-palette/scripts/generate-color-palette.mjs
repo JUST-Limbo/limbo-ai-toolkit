@@ -205,9 +205,27 @@ function getSpectrum(h, s, l) {
     return "other"
 }
 
+function parseOklchLightness(value) {
+    const match = value.match(/oklch\(\s*([\d.]+%?)/i)
+    if (!match) {
+        return 50
+    }
+    let l = Number.parseFloat(match[1])
+    if (Number.isNaN(l)) {
+        return 50
+    }
+    if (match[1].includes("%")) {
+        return l
+    }
+    if (l <= 1) {
+        return l * 100
+    }
+    return l
+}
+
 function analyzeColor(value) {
     if (value.startsWith("oklch")) {
-        return { spectrum: "oklch", sortHue: 999, sortSat: 0, sortLight: 50 }
+        return { spectrum: "oklch", sortHue: 999, sortSat: 0, sortLight: parseOklchLightness(value) }
     }
     let rgb = null
     if (value.startsWith("#")) {
@@ -234,17 +252,11 @@ function compareColors(a, b) {
     if (ga !== gb) {
         return ga - gb
     }
-    if (a.spectrum === "neutral") {
-        if (a.sortLight !== b.sortLight) {
-            return a.sortLight - b.sortLight
-        }
-        return a.sortSat - b.sortSat
+    if (a.sortLight !== b.sortLight) {
+        return a.sortLight - b.sortLight
     }
     if (a.sortHue !== b.sortHue) {
         return a.sortHue - b.sortHue
-    }
-    if (a.sortLight !== b.sortLight) {
-        return a.sortLight - b.sortLight
     }
     if (a.sortSat !== b.sortSat) {
         return a.sortSat - b.sortSat
@@ -323,8 +335,8 @@ const html = `<!DOCTYPE html>
   .section-title { font-size: 14px; color: #666; margin: 18px 0 10px; }
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
   }
   .card {
     background: #fff; border: 1px solid #ececec; border-radius: 12px; overflow: hidden;
@@ -332,9 +344,9 @@ const html = `<!DOCTYPE html>
   }
   .card:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.06); }
   .card.selected { outline: 2px solid #727fff; outline-offset: 2px; }
-  .swatch { height: 72px; display: flex; align-items: flex-end; padding: 8px 10px; font-size: 11px; font-weight: 600; letter-spacing: .02em; }
-  .info { padding: 10px 12px 12px; }
-  .value { font-family: Consolas, monospace; font-size: 13px; word-break: break-all; }
+  .swatch { height: 56px; display: flex; align-items: flex-end; padding: 6px 8px; font-size: 10px; font-weight: 600; letter-spacing: .02em; }
+  .info { padding: 8px 10px 10px; }
+  .value { font-family: Consolas, monospace; font-size: 12px; word-break: break-all; }
   .sub { margin-top: 6px; font-size: 11px; color: #888; line-height: 1.4; }
   .toast {
     position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px);
