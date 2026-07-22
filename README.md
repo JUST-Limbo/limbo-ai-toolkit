@@ -91,6 +91,22 @@ alwaysApply: true
 复制正文到 .cursor/rules/agent-global-baseline.mdc，设 alwaysApply: true
 ```
 
+### `style-reference-clarify`
+
+- 路径：[`rules/style-reference-clarify.md`](rules/style-reference-clarify.md)
+- 来源：`JUST-Limbo/limbo-ai-toolkit`（本仓库原创）
+- 作用域：**全局**（始终加载，不绑定文件 glob）
+- 功能：用户要求参考某处样式实现另一处时，先读参考源、再一轮多选确认必抄样式点，随即改目标代码；选了必抄，没选不代表不抄。五类高权重分组（字体/背景/边框/布局/形式）仅为出题参考，问哪几组由参考实现决定。详细说明见 [rules/README.md](rules/README.md#style-reference-clarify)。
+- Use example：
+
+```text
+参考首页 Hero 的样式做活动页顶栏
+```
+
+```text
+复制 style-reference-clarify.md（去掉 YAML 头，保留文末来源注释）到 .cursor/rules/style-reference-clarify.mdc，设 alwaysApply: true
+```
+
 ---
 
 维护约定（含资产分类、版本规则、目录结构）见 [AGENTS.md](AGENTS.md)。
