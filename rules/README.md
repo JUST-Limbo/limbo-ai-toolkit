@@ -1,13 +1,6 @@
 # rules — 对外 Rule 库
 
-本目录是 [`README.md`](../README.md) 所述「对外资产」中的 **Rule** 一类：
-存放面向**其它项目**、可复用的规则与编码规约，供别的仓库取用（复制、引用或同步过去）。
-
-## 文件约定
-
-- **`rules/*.md` 正文 = 可直接复制的规则内容**（YAML 头仅本仓库治理用；取用时 Claude Code 等平台一般**去掉 frontmatter**，保留 `# 全局规则` 起至文末的 Markdown，**含文末 HTML 来源注释**）。
-- 文末 `<!-- x-source-* ... -->` 供取用方对照上游更新；**复制时须保留**，Agent 更新规则时可据此拉取最新版。
-- **功能说明、使用方法、版本历史** 写在本 README 的各 Rule 条目下，**不**放进 `.md` 规则文件正文中间，避免被误当作约束。
+本目录存放面向**其它项目**、可复用的规则与编码规约。创建、维护、版本、取用与加载优先级等约定见 [AGENTS.md](../AGENTS.md#rule创建维护与调用)。
 
 ## 规则清单
 
@@ -20,7 +13,7 @@
 ### `agent-global-baseline`
 
 - 来源：`JUST-Limbo/limbo-ai-toolkit`
-- 版本：`1.2.1`（见文件内 `x-rule-version` 与文末来源注释）
+- 版本：见文件内 `x-rule-version` 与文末来源注释
 - 作用域：**全局**（始终加载，不绑定文件 glob）
 
 #### 功能说明
@@ -41,27 +34,7 @@
 
 #### 使用方法
 
-整文件复制 [`agent-global-baseline.md`](agent-global-baseline.md)，**去掉 YAML frontmatter** 后写入目标路径；**保留文末 `<!-- x-source-* -->` 注释**，便于日后对照 [上游文件](https://github.com/JUST-Limbo/limbo-ai-toolkit/blob/main/rules/agent-global-baseline.md) 更新。Cursor 改用下方 frontmatter。
-
-**对照更新**：读取本地规则文末注释中的 `x-source-url`（或 `x-source-repo` + `x-source-path`），与上游 diff；本地 `x-rule-version` 低于上游 `x-rule-version` 时再合并更新。
-
-| 工具 | 目标路径 | 加载配置 |
-|------|---------|---------|
-| Claude Code | `~/.claude/CLAUDE.md` | 用户级自动加载 |
-| Cursor | `.cursor/rules/agent-global-baseline.mdc` | `alwaysApply: true` |
-| Claude Code（项目内） | `.claude/rules/agent-global-baseline.md` | 无 `paths:` 即全局 |
-| GitHub Copilot | 合并进 `.github/copilot-instructions.md` | 仓库级自动加载 |
-
-Cursor 的 frontmatter 示例：
-
-```yaml
----
-description: Global always-on baseline for AI agents
-alwaysApply: true
----
-```
-
-与专题 Rule 冲突时，以**更具体**的目录/项目 Rule 为准。
+规则正文：[`agent-global-baseline.md`](agent-global-baseline.md)。复制、frontmatter 调整、对照上游更新见 [AGENTS.md §3](../AGENTS.md#3-项目本地-rule-与对外-rule)。
 
 #### Version Notes
 
@@ -80,17 +53,3 @@ alwaysApply: true
 **1.0.0**
 
 - 初始版本。
-
----
-
-> **判断标准（全仓库统一）**：一条规则若写给"使用这些资产的别的项目"看，放本目录（对外）；
-> 若只约束"在本仓库里干活"的 AI 工具行为，则属于**项目本地配置**，放各工具的隐藏目录，见下。
-
-## 不要和「项目本地规则」混淆
-
-约束**本仓库自身**行为的规则（如提交信息格式）属于项目本地配置，**不放本目录**，
-而是放进团队所用每个 AI 工具各自约定的固定路径，例如 `.cursor/rules/*.mdc`、
-`.claude/rules/*.md`、`.github/copilot-instructions.md` …，每个工具各放一份且正文一致。
-
-例如"提交信息格式"这类只约束本仓库的规则就放在这些工具路径里，**不进入 `rules/` 库**。
-完整的两类划分、各工具路径与同步约定见 [AGENTS.md](../AGENTS.md)。

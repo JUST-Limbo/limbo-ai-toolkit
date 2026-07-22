@@ -36,7 +36,7 @@ rules/       可复用 Rule（编码规约、流程约束等）
 - 路径：[`rules/agent-global-baseline.md`](rules/agent-global-baseline.md)
 - 来源：`JUST-Limbo/limbo-ai-toolkit`（本仓库原创）
 - 作用域：**全局**（始终加载，不绑定文件 glob）
-- 功能：跨项目 Agent 全局基线（简体中文、代码原则、目录预检查、Git 临时 proxy 等）。**功能说明与取用方式**见 [rules/README.md](rules/README.md#agent-global-baseline)。
+- 功能：跨项目 Agent 全局基线（简体中文、代码原则、目录预检查、Git 临时 proxy 等）。功能说明见 [rules/README.md](rules/README.md#agent-global-baseline)；取用方式见 [AGENTS.md](AGENTS.md#3-项目本地-rule-与对外-rule)。
 - Use example：
 
 ```text
