@@ -5,8 +5,9 @@
 
 ## 文件约定
 
-- **`rules/*.md` 正文 = 可直接复制的规则内容**（YAML 头仅本仓库治理用；取用时 Claude Code 等平台一般**去掉 frontmatter**，只保留 `# 全局规则` 起的 Markdown）。
-- **功能说明、使用方法、版本历史** 写在本 README 的各 Rule 条目下，**不**放进 `.md` 规则文件，避免被误复制进目标项目的 Rule。
+- **`rules/*.md` 正文 = 可直接复制的规则内容**（YAML 头仅本仓库治理用；取用时 Claude Code 等平台一般**去掉 frontmatter**，保留 `# 全局规则` 起至文末的 Markdown，**含文末 HTML 来源注释**）。
+- 文末 `<!-- x-source-* ... -->` 供取用方对照上游更新；**复制时须保留**，Agent 更新规则时可据此拉取最新版。
+- **功能说明、使用方法、版本历史** 写在本 README 的各 Rule 条目下，**不**放进 `.md` 规则文件正文中间，避免被误当作约束。
 
 ## 规则清单
 
@@ -19,7 +20,7 @@
 ### `agent-global-baseline`
 
 - 来源：`JUST-Limbo/limbo-ai-toolkit`
-- 版本：`1.2.0`（见文件内 `x-rule-version`）
+- 版本：`1.2.1`（见文件内 `x-rule-version` 与文末来源注释）
 - 作用域：**全局**（始终加载，不绑定文件 glob）
 
 #### 功能说明
@@ -40,7 +41,9 @@
 
 #### 使用方法
 
-整文件复制 [`agent-global-baseline.md`](agent-global-baseline.md)，**去掉 YAML frontmatter** 后写入目标路径；Cursor 改用下方 frontmatter。
+整文件复制 [`agent-global-baseline.md`](agent-global-baseline.md)，**去掉 YAML frontmatter** 后写入目标路径；**保留文末 `<!-- x-source-* -->` 注释**，便于日后对照 [上游文件](https://github.com/JUST-Limbo/limbo-ai-toolkit/blob/main/rules/agent-global-baseline.md) 更新。Cursor 改用下方 frontmatter。
+
+**对照更新**：读取本地规则文末注释中的 `x-source-url`（或 `x-source-repo` + `x-source-path`），与上游 diff；本地 `x-rule-version` 低于上游 `x-rule-version` 时再合并更新。
 
 | 工具 | 目标路径 | 加载配置 |
 |------|---------|---------|
@@ -61,6 +64,10 @@ alwaysApply: true
 与专题 Rule 冲突时，以**更具体**的目录/项目 Rule 为准。
 
 #### Version Notes
+
+**1.2.1**
+
+- 正文末尾增加 HTML 来源注释（`x-source-repo` / `x-source-path` / `x-rule-version` / `x-source-url`），复制后仍可追踪上游。
 
 **1.2.0**
 

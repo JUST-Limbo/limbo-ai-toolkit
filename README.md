@@ -40,7 +40,7 @@ rules/       可复用 Rule（编码规约、流程约束等）
 - Use example：
 
 ```text
-复制 agent-global-baseline.md（去掉 YAML 头）到 ~/.claude/CLAUDE.md
+复制 agent-global-baseline.md（去掉 YAML 头，保留文末来源注释）到 ~/.claude/CLAUDE.md
 ```
 
 ```text

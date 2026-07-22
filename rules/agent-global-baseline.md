@@ -1,7 +1,7 @@
 ---
 name: agent-global-baseline
 description: Global always-on baseline rules for AI agents working in any project repository
-x-rule-version: 1.2.0
+x-rule-version: 1.2.1
 x-source-repo: JUST-Limbo/limbo-ai-toolkit
 x-source-path: rules/agent-global-baseline.md
 scope: global
@@ -64,3 +64,8 @@ $env:HTTP_PROXY = "http://127.0.0.1:<port>"; $env:HTTPS_PROXY = "http://127.0.0.
 ```
 
 仍失败时再排查 `hosts`；若发现已存在全局 proxy 配置，告知用户即可，不要擅自改动。
+
+<!-- x-source-repo: JUST-Limbo/limbo-ai-toolkit
+     x-source-path: rules/agent-global-baseline.md
+     x-rule-version: 1.2.1
+     x-source-url: https://github.com/JUST-Limbo/limbo-ai-toolkit/blob/main/rules/agent-global-baseline.md -->
