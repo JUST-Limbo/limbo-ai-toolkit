@@ -1,6 +1,6 @@
 # rules — 对外 Rule 库
 
-本目录存放面向**其它项目**、可复用的规则与编码规约。创建、维护、版本、取用与加载优先级等约定见 [AGENTS.md](../AGENTS.md#rule创建维护与调用)。
+本目录存放面向**其它项目**、可复用的规则与编码规约。创建、维护与版本治理见 [AGENTS.md](../AGENTS.md#rule创建维护与调用)；取用方式见根 [README.md](../README.md#取用方式)。
 
 ## 规则清单
 
@@ -34,7 +34,7 @@
 
 #### 使用方法
 
-规则正文：[`agent-global-baseline.md`](agent-global-baseline.md)。复制、frontmatter 调整、对照上游更新见 [AGENTS.md §3](../AGENTS.md#3-项目本地-rule-与对外-rule)。
+规则正文：[`agent-global-baseline.md`](agent-global-baseline.md)。复制、frontmatter 调整、对照上游更新见根 [README.md §取用方式](../README.md#取用方式)。
 
 #### Version Notes
 
