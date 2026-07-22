@@ -26,6 +26,21 @@ rules/       可复用 Rule（编码规约、流程约束等）
 帮我盘点项目颜色，输出 HTML 报告
 ```
 
+### `generate-style-catalog`
+
+- 路径：[`skills/generate-style-catalog/`](skills/generate-style-catalog/SKILL.md)
+- 来源：`JUST-Limbo/limbo-ai-toolkit`（本仓库原创）
+- 功能：扫描 Vue 功能模块目录，从 SFC `<style>` 块提取 CSS 规则，按组件分组，生成交互式 HTML 样式目录（属性分类 Tab、搜索、覆盖复制 / 追加汇总）。
+- Use example：
+
+```text
+/generate-style-catalog 扫描 features/checkout 生成样式目录
+```
+
+```text
+帮我盘点登录模块的 CSS 样式特征，输出可批量复制的 HTML
+```
+
 ### `git-branch-merge-flow`
 
 - 路径：[`skills/git-branch-merge-flow/`](skills/git-branch-merge-flow/SKILL.md)
