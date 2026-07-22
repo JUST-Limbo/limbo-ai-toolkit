@@ -2,6 +2,8 @@
 name: git-branch-merge-flow
 description: On current branch guards that source != target, fetches origin first, commits if needed, aligns local current with origin/current if behind, pushes current; then checks out target, fetches, aligns with origin/target if behind, merges origin/current into target, pushes target, and switches back on success. Stays on the branch where conflict occurs without pushing target on failure.
 x-skill-version: 1.5.0
+x-source-repo: JUST-Limbo/limbo-ai-toolkit
+x-source-path: skills/git-branch-merge-flow
 ---
 
 # Git Branch Merge Flow

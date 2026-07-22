@@ -14,6 +14,7 @@ rules/       可复用 Rule（编码规约、流程约束等）
 ### `git-branch-merge-flow`
 
 - 路径：[`skills/git-branch-merge-flow/`](skills/git-branch-merge-flow/SKILL.md)
+- 来源：`JUST-Limbo/limbo-ai-toolkit`（本仓库原创）
 - 功能：将当前分支的改动按固定流程同步到目标分支。先校验来源≠目标；在 **CurrentBranch** 上：`fetch` → 必要时提交 → 若落后则对齐 `origin/<当前>` → `push`；在 **TargetBranch** 上：checkout → `fetch` → 对齐 `origin/<目标>`（若需要）→ 以 `origin/<当前>` 为来源合并 → 推送目标分支；若无冲突则切回之前的分支，冲突则停在当前阶段所在分支等待处理。
 - Use example：
 
@@ -32,4 +33,4 @@ rules/       可复用 Rule（编码规约、流程约束等）
 
 ---
 
-维护与贡献（含资产分类、版本规则、提交约定）见 [CONTRIBUTING.md](CONTRIBUTING.md) 与 [AGENTS.md](AGENTS.md)。
+维护约定（含资产分类、版本规则、目录结构）见 [AGENTS.md](AGENTS.md)。

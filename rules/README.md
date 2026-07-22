@@ -14,4 +14,4 @@
 `.claude/rules/*.md`、`.github/copilot-instructions.md` …，每个工具各放一份且正文一致。
 
 例如"提交信息格式"这类只约束本仓库的规则就放在这些工具路径里，**不进入 `rules/` 库**。
-完整的两类划分、各工具路径与同步约定见 [CONTRIBUTING.md](../CONTRIBUTING.md)。
+完整的两类划分、各工具路径与同步约定见 [AGENTS.md](../AGENTS.md)。
