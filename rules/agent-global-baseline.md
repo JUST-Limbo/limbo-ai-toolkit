@@ -1,7 +1,7 @@
 ---
 name: agent-global-baseline
 description: Global always-on baseline rules for AI agents working in any project repository
-x-rule-version: 1.2.2
+x-rule-version: 1.2.3
 x-source-repo: JUST-Limbo/limbo-ai-toolkit
 x-source-path: rules/agent-global-baseline.md
 scope: global
@@ -38,9 +38,9 @@ scope: global
 
 ## Git
 
-### 提交前检查
+### git commit 前检查
 
-- 提交前检查**本仓库 local** 的 Git 身份：`git config --local user.name` 与 `git config --local user.email`。任一未配置则**中止提交流程**，说明未设 local 时 Git 可能静默沿用 global，并让用户决定下一步（为本仓库设置 local、或确认沿用 global 后再继续）；**不得**擅自执行 `git config --global` / `--local` 写入。
+- 执行 `git commit` 之前（`git add` 之后、写入 commit 之前）：检查**本仓库 local** 的 Git 身份：`git config --local user.name` 与 `git config --local user.email`。任一未配置则**中止提交流程**，说明未设 local 时 Git 可能静默沿用 global，并让用户决定下一步（为本仓库设置 local、或确认沿用 global 后再继续）；**不得**擅自执行 `git config --global` / `--local` 写入。
 - 生成 mock 数据时，请用注释明确标出，并提醒我：提交 git 前记得将 mock 数据注释掉。
 - 让你提交代码时，先检查提交内容中是否包含测试数据、临时性的输出语句等；若存在，必须先询问我是否需要清除，得到明确答复后再执行提交。
 
@@ -68,5 +68,5 @@ $env:HTTP_PROXY = "http://127.0.0.1:<port>"; $env:HTTPS_PROXY = "http://127.0.0.
 
 <!-- x-source-repo: JUST-Limbo/limbo-ai-toolkit
      x-source-path: rules/agent-global-baseline.md
-     x-rule-version: 1.2.2
+     x-rule-version: 1.2.3
      x-source-url: https://github.com/JUST-Limbo/limbo-ai-toolkit/blob/main/rules/agent-global-baseline.md -->
