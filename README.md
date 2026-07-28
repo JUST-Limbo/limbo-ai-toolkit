@@ -7,6 +7,7 @@
 ```
 skills/      可复用 Skill（每个一目录：SKILL.md 最新版 + versions/ 历史快照）
 rules/       可复用 Rule（编码规约、流程约束等）
+mcp/         可复用 MCP Server（每个一子目录：package.json + README）
 ```
 
 ## Skills
@@ -51,6 +52,40 @@ rules/       可复用 Rule（编码规约、流程约束等）
 
 ```text
 /git-branch-merge-flow 合并到release/yyy
+```
+
+## MCP
+
+`mcp/` 下存放可被其它项目复用的 MCP Server。清单、接入步骤与 Version Notes 见 [mcp/README.md](mcp/README.md)。
+
+### 取用方式
+
+1. 复制 `mcp/<name>/` 目录（含 `dist/`）到目标仓库，或 clone 本仓库
+2. 在目标项目 `.cursor/mcp.json` 中配置 `command` / `args` / `env`（详见各 MCP 的 README）
+3. 重启 Cursor 或刷新 MCP
+
+**使用者无需 `npm install`**（已提交 esbuild 单文件 `dist/`）；修改源码的开发者需在对应子目录 `npm install && npm run build`。
+
+### `tinymcp`
+
+- 路径：[`mcp/tinymcp/`](mcp/tinymcp/README.md)
+- 版本：**2.1.0**
+- 功能：通过 [TinyPNG 官方 API](https://tinypng.com/developers) 压缩 PNG/JPG/WebP/AVIF。MCP Tools：`compress_local_image`、`compress_images_glob`；CLI 命令 `tinymcp`。须配置 **`TINIFY_API_KEY`**（多个 Key 用 `,` 或 `;` 分隔）。免费约 500 次/月/Key。
+- 详细说明：[`mcp/tinymcp/README.md`](mcp/tinymcp/README.md)
+- 免责声明：[`mcp/tinymcp/DISCLAIMER.md`](mcp/tinymcp/DISCLAIMER.md)
+- Use example：
+
+```text
+帮我把 C:/Users/xxx/Desktop/logo.png 压缩一下
+```
+
+```text
+在 .cursor/mcp.json 填入 TINIFY_API_KEY，重启 Cursor 后用 tinymcp 压图
+```
+
+```powershell
+$env:TINIFY_API_KEY = "你的KEY"
+node mcp/tinymcp/dist/tinymcp-cli.cjs "assets/**/*.png" -o dist -w 800
 ```
 
 ## Rules
