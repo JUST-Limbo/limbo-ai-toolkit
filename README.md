@@ -18,6 +18,7 @@ mcp/         可复用 MCP Server（每个一子目录：package.json + README�
 |------|------|
 | `generate-color-palette` | 扫描前端源码中的 hex / rgb / oklch 颜色值，去重后按色谱分组，生成交互式 HTML 色板（搜索、Tab 筛选、点击复制） |
 | `git-branch-merge-flow` | 将当前分支按固定流程同步到目标分支：`fetch` → 对齐 `origin/*` → `push` → checkout 目标 → merge `origin/<当前>` → 推送；冲突时停在当前阶段分支 |
+| `picture-formats` | 同源并行导出 AVIF/WebP/JPEG（或 PNG），用 `<picture>` 让浏览器只下载一种；含 Vue 实践、透明兜底、Network 排错与 tinymcp 素材准备 |
 
 ### Rules
 
