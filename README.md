@@ -17,7 +17,6 @@ mcp/         可复用 MCP Server（每个一子目录：package.json + README�
 | 名称 | 说明 |
 |------|------|
 | `generate-color-palette` | 扫描前端源码中的 hex / rgb / oklch 颜色值，去重后按色谱分组，生成交互式 HTML 色板（搜索、Tab 筛选、点击复制） |
-| `generate-style-catalog` | 扫描 Vue 功能模块目录，从 SFC `<style>` 块提取 CSS 规则，按组件分组，生成交互式 HTML 样式目录（属性分类 Tab、搜索、覆盖复制 / 追加汇总） |
 | `git-branch-merge-flow` | 将当前分支按固定流程同步到目标分支：`fetch` → 对齐 `origin/*` → `push` → checkout 目标 → merge `origin/<当前>` → 推送；冲突时停在当前阶段分支 |
 
 ### Rules
