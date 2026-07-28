@@ -1,7 +1,7 @@
 ---
 name: tinymcp
 description: MCP server for compressing images via TinyPNG official API
-x-mcp-version: 2.1.1
+x-mcp-version: 2.2.0
 x-source-repo: JUST-Limbo/limbo-ai-toolkit
 x-source-path: mcp/tinymcp
 ---
@@ -10,7 +10,7 @@ x-source-path: mcp/tinymcp
 
 基于 [TinyPNG 官方 Developer API](https://tinypng.com/developers) 的图片压缩 **MCP Server** 与 **CLI**。
 
-当前版本：**2.1.1**（官方 API + `tinify` SDK，支持多 Key）
+当前版本：**2.2.0**（官方 API + `tinify` SDK，支持多 Key、格式转换）
 
 > **取用原则**：从 `mcp/tinymcp/dist/` **只复制** `tinymcp.cjs`（+ 可选 `tinymcp-cli.cjs`）到目标项目的 **`.cursor/tinymcp/`** 或 **`.claude/tinymcp/`**。无需 `npm install`，不必复制 `src/` 等源码。
 
@@ -20,9 +20,10 @@ x-source-path: mcp/tinymcp
 
 ### 解决什么问题
 
-- 在 Cursor / Claude 对话中，让 Agent **直接压缩本地图片**（MCP Tools）
+- 在 Cursor / Claude 对话中，让 Agent **直接压缩或转换本地图片**（MCP Tools）
 - 在终端中 **批量压缩** PNG/JPG 等（CLI）
 - 可选 **等比缩放**（宽度 / 高度）
+- 可选 **格式转换**（PNG/JPG → AVIF / WebP 等，便于多格式分发素材准备）
 
 ### 适用场景
 
@@ -40,12 +41,17 @@ x-source-path: mcp/tinymcp
 
 | 能力 | 说明 |
 |------|------|
-| MCP `compress_local_image` | 压缩单张本地图片 |
+| MCP `compress_local_image` | 压缩单张本地图片（保持原格式） |
 | MCP `compress_images_glob` | 按 glob 批量压缩 |
-| CLI `tinymcp` | 命令行压缩，支持 glob、输出目录、缩放 |
-| 库 `compressFile()` | 在 Node 脚本中调用 |
+| MCP `convert_local_image` | 单张转指定格式（avif/webp/jpg/png/jxl） |
+| MCP `convert_local_image_formats` | 单张导出多种格式（如 avif+webp+jpg） |
+| MCP `convert_images_glob` | 按 glob 批量转指定格式 |
+| CLI `tinymcp` | 命令行压缩/转换，支持 `-f` / `-F`、glob、输出目录、缩放 |
+| 库 `compressFile()` / `convertFile()` / `convertToFormats()` | 在 Node 脚本中调用 |
 
-支持格式：`.png`、`.jpg`、`.jpeg`、`.webp`、`.avif`（以 [官方 API](https://tinypng.com/developers) 为准）。
+输入支持：`.png`、`.jpg`、`.jpeg`、`.webp`、`.avif`。  
+转换输出支持：`avif`、`webp`、`jpg`、`png`、`jxl`（以 [官方 API](https://tinypng.com/developers) 为准）。  
+**每种目标格式各计 1 次 API 额度**（导出三格式 ≈ 3 次）。
 
 ---
 
@@ -180,6 +186,42 @@ node .cursor/tinymcp/tinymcp-cli.cjs logo.png
 | `width` | 否 | 目标宽度 |
 | `height` | 否 | 目标高度 |
 
+### `convert_local_image`
+
+将单张图片转为指定格式并压缩。未指定 `outputPath` 时：**同目录、同主文件名、换扩展名，保留原图**。
+
+| 参数 | 必填 | 说明 |
+|------|------|------|
+| `inputPath` | 是 | 输入图片绝对路径 |
+| `format` | 是 | `avif` / `webp` / `jpg` / `png` / `jxl` |
+| `outputPath` | 否 | 输出文件或目录；省略则同目录换扩展名 |
+| `width` | 否 | 目标宽度 |
+| `height` | 否 | 目标高度 |
+
+### `convert_local_image_formats`
+
+从一张原图导出多种格式（多格式分发素材准备）。**每种格式各计 1 次额度**。
+
+| 参数 | 必填 | 说明 |
+|------|------|------|
+| `inputPath` | 是 | 输入图片绝对路径 |
+| `formats` | 是 | 如 `["avif","webp","jpg"]` |
+| `outputDir` | 否 | 输出目录；省略则与输入同目录 |
+| `width` | 否 | 目标宽度 |
+| `height` | 否 | 目标高度 |
+
+### `convert_images_glob`
+
+按 glob 批量转为指定格式。
+
+| 参数 | 必填 | 说明 |
+|------|------|------|
+| `patterns` | 是 | glob 数组 |
+| `format` | 是 | 目标格式 |
+| `outputDir` | 否 | 输出目录；省略则各文件同目录换扩展名 |
+| `width` | 否 | 目标宽度 |
+| `height` | 否 | 目标高度 |
+
 ---
 
 ## CLI 参数
@@ -191,32 +233,53 @@ tinymcp <patterns...> [选项]
   patterns          图片路径或 glob，如 'assets/**/*.{png,jpg}'
 
 选项:
-  -k, --key <keys>  API Key（默认 TINIFY_API_KEY；多个用 , 或 ; 分隔）
-  -o, --out <dir>   输出目录（省略则覆盖原文件）
-  -w, --width <px>  目标宽度
-  -H, --height <px> 目标高度
+  -k, --key <keys>    API Key（默认 TINIFY_API_KEY；多个用 , 或 ; 分隔）
+  -o, --out <dir>     输出目录或文件路径
+  -f, --format <fmt>  转格式：avif | webp | jpg | png | jxl（省略则仅压缩原格式）
+  -F, --formats <list>  单文件导出多格式，逗号分隔，如 avif,webp,jpg
+  -w, --width <px>    目标宽度
+  -H, --height <px>   目标高度
 ```
 
-**MCP 与 CLI 默认行为一致**：未指定 `outputPath` / `outputDir` / `-o` 时，**覆盖原文件**。若要保留原图，须显式指定其它输出路径或目录。
+**压缩**（无 `-f`）：未指定 `-o` 时**覆盖原文件**。  
+**转换**（有 `-f` / `-F`）：未指定 `-o` 时**同目录换扩展名、保留原图**。
+
+```powershell
+# 转 WebP（同目录生成 logo.webp，保留 logo.png）
+node .cursor/tinymcp/tinymcp-cli.cjs logo.png -f webp
+
+# 单张导出三格式（计 3 次额度）
+node .cursor/tinymcp/tinymcp-cli.cjs hero.jpg -F avif,webp,jpg -o dist
+```
 
 ---
 
 ## 作为库使用
 
 ```js
-import { setApiKey, compressFile, validateKey } from "./src/core.js";
+import {
+  setApiKey,
+  compressFile,
+  convertFile,
+  convertToFormats,
+  validateKey,
+} from "./src/core.js";
 
 setApiKey(process.env.TINIFY_API_KEY);
 
-const { compressionCount } = await validateKey();
+await validateKey();
 
-const r = await compressFile("logo.png", {
-  output: "dist/logo.png",
-  width: 800,
+// 压缩（保持 PNG）
+const r1 = await compressFile("logo.png", { output: "dist/logo.png" });
+
+// 转 WebP（默认同目录 logo.webp，保留原图）
+const r2 = await convertFile("logo.png", { format: "webp" });
+
+// 多格式导出（各计 1 次 API）
+const r3 = await convertToFormats("hero.jpg", {
+  formats: ["avif", "webp", "jpg"],
+  outputDir: "dist",
 });
-
-console.log(r);
-// { input, output, before, after, saved, ratio, compressionCount }
 ```
 
 ---
@@ -343,6 +406,7 @@ Key 无效或过期。到 https://tinypng.com/dashboard/api 核对。
 
 | 版本 | 说明 |
 |------|------|
+| **2.2.0** | 新增格式转换：`convertFile` / `convertToFormats`；MCP `convert_*` Tools；CLI `-f` / `-F` |
 | **2.1.1** | MCP 默认输出改为覆盖原文件（与 CLI 一致） |
 | **2.1.0** | 支持 `TINIFY_API_KEY` 多 Key（`,` / `;` 分隔），轮询 + 失败自动切换 |
 | **2.0.0** | 官方 API（`tinify` SDK）；项目更名为 **tinymcp** |

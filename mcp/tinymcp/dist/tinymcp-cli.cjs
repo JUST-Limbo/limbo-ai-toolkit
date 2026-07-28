@@ -6400,8 +6400,8 @@ var require_pattern = __commonJS({
     }
     exports2.endsWithSlashGlobStar = endsWithSlashGlobStar;
     function isAffectDepthOfReadingPattern(pattern) {
-      const basename2 = path.basename(pattern);
-      return endsWithSlashGlobStar(pattern) || isStaticPattern(basename2);
+      const basename3 = path.basename(pattern);
+      return endsWithSlashGlobStar(pattern) || isStaticPattern(basename3);
     }
     exports2.isAffectDepthOfReadingPattern = isAffectDepthOfReadingPattern;
     function expandPatternsWithBraceExpansion(patterns) {
@@ -13748,11 +13748,70 @@ var import_promises = require("node:fs/promises");
 var import_node_path = require("node:path");
 var import_tinify = __toESM(require_lib(), 1);
 var ALLOWED_EXT = /* @__PURE__ */ new Set([".png", ".jpg", ".jpeg", ".webp", ".avif"]);
+var FORMAT_ALIASES = {
+  avif: "image/avif",
+  webp: "image/webp",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  jxl: "image/jxl"
+};
+var MIME_TO_EXT = {
+  "image/avif": ".avif",
+  "image/webp": ".webp",
+  "image/jpeg": ".jpg",
+  "image/jpg": ".jpg",
+  "image/png": ".png",
+  "image/jxl": ".jxl"
+};
 var apiKeys = [];
 var keyIndex = 0;
 function parseApiKeys(raw) {
   if (!raw || typeof raw !== "string") return [];
   return raw.split(/[,;]/).map((s) => s.trim()).filter(Boolean);
+}
+function normalizeFormat(format) {
+  if (!format || typeof format !== "string") {
+    throw new Error("\u7F3A\u5C11\u76EE\u6807\u683C\u5F0F");
+  }
+  const raw = format.toLowerCase().trim();
+  if (raw.indexOf("image/") === 0) {
+    return raw;
+  }
+  if (raw.charAt(0) === ".") {
+    const key = raw.slice(1);
+    if (FORMAT_ALIASES[key]) {
+      return FORMAT_ALIASES[key];
+    }
+  }
+  if (FORMAT_ALIASES[raw]) {
+    return FORMAT_ALIASES[raw];
+  }
+  throw new Error(
+    `\u4E0D\u652F\u6301\u7684\u76EE\u6807\u683C\u5F0F: ${format}\uFF0C\u652F\u6301 avif / webp / jpg / png / jxl`
+  );
+}
+function extensionForFormat(format) {
+  const mime = normalizeFormat(format);
+  const ext = MIME_TO_EXT[mime];
+  if (ext) {
+    return ext;
+  }
+  const parts = mime.split("/");
+  return "." + parts[parts.length - 1];
+}
+function resolveConvertOutputPath(input, output, format) {
+  const newExt = extensionForFormat(format);
+  const stem = (0, import_node_path.basename)(input, (0, import_node_path.extname)(input));
+  if (!output) {
+    return (0, import_node_path.join)((0, import_node_path.dirname)(input), stem + newExt);
+  }
+  const trimmed = output.replace(/[\\/]+$/, "");
+  const outExt = (0, import_node_path.extname)(trimmed).toLowerCase();
+  if (!outExt) {
+    return (0, import_node_path.join)(trimmed, stem + newExt);
+  }
+  return trimmed;
 }
 function setApiKey(keys) {
   const list = Array.isArray(keys) ? keys.flatMap((k) => parseApiKeys(k)) : parseApiKeys(keys);
@@ -13778,7 +13837,22 @@ function shouldTryNextKey(err) {
   }
   return false;
 }
-async function compressWithKey(input, opts, index) {
+function assertInputExt(input) {
+  const ext = (0, import_node_path.extname)(input).toLowerCase();
+  if (!ALLOWED_EXT.has(ext)) {
+    throw new Error(
+      `\u4E0D\u652F\u6301\u7684\u8F93\u5165\u683C\u5F0F: ${ext}\uFF0C\u652F\u6301 .png / .jpg / .jpeg / .webp / .avif`
+    );
+  }
+}
+function assertApiKeys() {
+  if (apiKeys.length === 0) {
+    throw new Error(
+      "\u7F3A\u5C11 TinyPNG API Key\uFF08\u73AF\u5883\u53D8\u91CF TINIFY_API_KEY\uFF0C\u6216 CLI \u7684 -k\uFF09"
+    );
+  }
+}
+async function processImageWithKey(input, opts, index) {
   activateKey(index);
   const before = (await (0, import_promises.readFile)(input)).length;
   let source = import_tinify.default.fromFile(input);
@@ -13789,7 +13863,17 @@ async function compressWithKey(input, opts, index) {
     if (opts.height) resize.height = opts.height;
     source = source.resize(resize);
   }
-  const output = opts.output || input;
+  let output;
+  let formatLabel = null;
+  let mimeType = null;
+  if (opts.format) {
+    mimeType = normalizeFormat(opts.format);
+    formatLabel = mimeType.split("/")[1];
+    source = source.convert({ type: mimeType });
+    output = resolveConvertOutputPath(input, opts.output, opts.format);
+  } else {
+    output = opts.output || input;
+  }
   await source.toFile(output);
   const after = (await (0, import_promises.readFile)(output)).length;
   return {
@@ -13801,27 +13885,18 @@ async function compressWithKey(input, opts, index) {
     ratio: before ? (before - after) / before : 0,
     compressionCount: import_tinify.default.compressionCount,
     keyIndex: index + 1,
-    keyCount: apiKeys.length
+    keyCount: apiKeys.length,
+    format: formatLabel,
+    mimeType
   };
 }
-async function compressFile(input, opts = {}) {
-  const ext = (0, import_node_path.extname)(input).toLowerCase();
-  if (!ALLOWED_EXT.has(ext)) {
-    throw new Error(
-      `\u4E0D\u652F\u6301\u7684\u683C\u5F0F: ${ext}\uFF0C\u652F\u6301 .png / .jpg / .jpeg / .webp / .avif`
-    );
-  }
-  if (apiKeys.length === 0) {
-    throw new Error(
-      "\u7F3A\u5C11 TinyPNG API Key\uFF08\u73AF\u5883\u53D8\u91CF TINIFY_API_KEY\uFF0C\u6216 CLI \u7684 -k\uFF09"
-    );
-  }
+async function runWithKeyRotation(input, opts) {
   const start = keyIndex;
   let lastError = null;
   for (let attempt = 0; attempt < apiKeys.length; attempt++) {
     const index = (start + attempt) % apiKeys.length;
     try {
-      const result = await compressWithKey(input, opts, index);
+      const result = await processImageWithKey(input, opts, index);
       keyIndex = (index + 1) % apiKeys.length;
       return result;
     } catch (err) {
@@ -13834,17 +13909,112 @@ async function compressFile(input, opts = {}) {
   }
   throw lastError;
 }
+async function compressFile(input, opts = {}) {
+  assertInputExt(input);
+  assertApiKeys();
+  return runWithKeyRotation(input, opts);
+}
+async function convertFile(input, opts = {}) {
+  if (!opts.format) {
+    throw new Error("convertFile \u9700\u8981 format \u53C2\u6570\uFF08avif / webp / jpg / png / jxl\uFF09");
+  }
+  assertInputExt(input);
+  assertApiKeys();
+  normalizeFormat(opts.format);
+  return runWithKeyRotation(input, opts);
+}
+async function convertToFormats(input, opts = {}) {
+  const formats = opts.formats;
+  if (!formats || !Array.isArray(formats) || formats.length === 0) {
+    throw new Error("convertToFormats \u9700\u8981 formats \u6570\u7EC4\uFF0C\u5982 ['avif','webp','jpg']");
+  }
+  const results = [];
+  for (let i = 0; i < formats.length; i++) {
+    const format = formats[i];
+    const output = opts.outputDir ? (0, import_node_path.join)(
+      opts.outputDir.replace(/[\\/]+$/, ""),
+      (0, import_node_path.basename)(input, (0, import_node_path.extname)(input)) + extensionForFormat(format)
+    ) : void 0;
+    const r = await convertFile(input, {
+      format,
+      output,
+      width: opts.width,
+      height: opts.height
+    });
+    results.push(r);
+  }
+  return results;
+}
 
 // bin/cli.js
 var kb = (n) => `${(n / 1024).toFixed(1)}KB`;
 var program2 = new Command();
-program2.name("tinymcp").description("\u7528 TinyPNG \u5B98\u65B9 API \u538B\u7F29\u56FE\u7247").argument("<patterns...>", "\u56FE\u7247\u8DEF\u5F84\u6216 glob\uFF0C\u5982 'assets/**/*.{png,jpg}'").option("-k, --key <keys>", "API Key\uFF08\u9ED8\u8BA4 TINIFY_API_KEY\uFF1B\u591A\u4E2A\u7528 , \u6216 ; \u5206\u9694\uFF09").option("-o, --out <dir>", "\u8F93\u51FA\u76EE\u5F55\uFF08\u9ED8\u8BA4\u8986\u76D6\u539F\u6587\u4EF6\uFF09").option("-w, --width <px>", "\u76EE\u6807\u5BBD\u5EA6", Number).option("-H, --height <px>", "\u76EE\u6807\u9AD8\u5EA6", Number).action(async (patterns, opts) => {
+program2.name("tinymcp").description("\u7528 TinyPNG \u5B98\u65B9 API \u538B\u7F29\u6216\u8F6C\u6362\u56FE\u7247\u683C\u5F0F").argument("<patterns...>", "\u56FE\u7247\u8DEF\u5F84\u6216 glob\uFF0C\u5982 'assets/**/*.{png,jpg}'").option("-k, --key <keys>", "API Key\uFF08\u9ED8\u8BA4 TINIFY_API_KEY\uFF1B\u591A\u4E2A\u7528 , \u6216 ; \u5206\u9694\uFF09").option("-o, --out <dir>", "\u8F93\u51FA\u76EE\u5F55\u6216\u6587\u4EF6\u8DEF\u5F84").option(
+  "-f, --format <fmt>",
+  "\u76EE\u6807\u683C\u5F0F\uFF1Aavif | webp | jpg | png | jxl\uFF08\u6307\u5B9A\u5219\u8F6C\u683C\u5F0F\uFF0C\u5426\u5219\u4EC5\u538B\u7F29\u539F\u683C\u5F0F\uFF09"
+).option(
+  "-F, --formats <list>",
+  "\u4E00\u6B21\u5BFC\u51FA\u591A\u79CD\u683C\u5F0F\uFF0C\u9017\u53F7\u5206\u9694\uFF0C\u5982 avif,webp,jpg\uFF08\u4EC5\u5355\u6587\u4EF6\u8F93\u5165\u65F6\u53EF\u7528\uFF09"
+).option("-w, --width <px>", "\u76EE\u6807\u5BBD\u5EA6", Number).option("-H, --height <px>", "\u76EE\u6807\u9AD8\u5EA6", Number).action(async (patterns, opts) => {
   try {
     setApiKey(opts.key || process.env.TINIFY_API_KEY);
     const files = await (0, import_fast_glob.default)(patterns, { onlyFiles: true });
     if (files.length === 0) {
       console.error("\u6CA1\u5339\u914D\u5230\u6587\u4EF6");
       process.exit(1);
+    }
+    if (opts.formats) {
+      if (files.length !== 1) {
+        console.error("\u591A\u683C\u5F0F\u5BFC\u51FA\uFF08-F\uFF09\u4EC5\u652F\u6301\u5355\u5F20\u8F93\u5165\u6587\u4EF6");
+        process.exit(1);
+      }
+      const formats = opts.formats.split(/[,;]/).map((s) => s.trim()).filter(Boolean);
+      if (opts.out) await (0, import_promises2.mkdir)(opts.out, { recursive: true });
+      const results = await convertToFormats(files[0], {
+        formats,
+        outputDir: opts.out,
+        width: opts.width,
+        height: opts.height
+      });
+      for (let i = 0; i < results.length; i++) {
+        const r = results[i];
+        console.log(`\u2713 ${r.format}  ${r.output}  ${kb(r.before)} \u2192 ${kb(r.after)}`);
+      }
+      const last = results[results.length - 1];
+      console.log(
+        `
+\u5B8C\u6210 ${results.length} \u79CD\u683C\u5F0F\u3002\u672C\u6708\u5DF2\u7528 ${last.compressionCount} \u6B21\u3002`
+      );
+      return;
+    }
+    if (opts.format) {
+      if (opts.out) await (0, import_promises2.mkdir)(opts.out, { recursive: true });
+      let lastCount2 = 0;
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        let output = opts.out;
+        if (output && files.length > 1) {
+          output = (0, import_node_path2.join)(
+            opts.out.replace(/[\\/]+$/, ""),
+            (0, import_node_path2.basename)(f, (0, import_node_path2.extname)(f)) + extensionForFormat(opts.format)
+          );
+        }
+        const r = await convertFile(f, {
+          format: opts.format,
+          output,
+          width: opts.width,
+          height: opts.height
+        });
+        lastCount2 = r.compressionCount;
+        console.log(
+          `\u2713 ${f}  \u2192 ${r.output}  ${kb(r.before)} \u2192 ${kb(r.after)}  (-${(r.ratio * 100).toFixed(1)}%)`
+        );
+      }
+      console.log(
+        `
+\u5B8C\u6210 ${files.length} \u5F20\uFF0C\u683C\u5F0F ${opts.format}\u3002\u672C\u6708\u5DF2\u7528 ${lastCount2} \u6B21\u3002`
+      );
+      return;
     }
     if (opts.out) await (0, import_promises2.mkdir)(opts.out, { recursive: true });
     let totalSaved = 0;

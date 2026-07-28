@@ -10273,8 +10273,8 @@ var require_pattern2 = __commonJS({
     }
     exports2.endsWithSlashGlobStar = endsWithSlashGlobStar;
     function isAffectDepthOfReadingPattern(pattern) {
-      const basename2 = path.basename(pattern);
-      return endsWithSlashGlobStar(pattern) || isStaticPattern(basename2);
+      const basename3 = path.basename(pattern);
+      return endsWithSlashGlobStar(pattern) || isStaticPattern(basename3);
     }
     exports2.isAffectDepthOfReadingPattern = isAffectDepthOfReadingPattern;
     function expandPatternsWithBraceExpansion(patterns) {
@@ -32599,11 +32599,70 @@ var import_promises = require("node:fs/promises");
 var import_node_path = require("node:path");
 var import_tinify = __toESM(require_lib(), 1);
 var ALLOWED_EXT = /* @__PURE__ */ new Set([".png", ".jpg", ".jpeg", ".webp", ".avif"]);
+var FORMAT_ALIASES = {
+  avif: "image/avif",
+  webp: "image/webp",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  jxl: "image/jxl"
+};
+var MIME_TO_EXT = {
+  "image/avif": ".avif",
+  "image/webp": ".webp",
+  "image/jpeg": ".jpg",
+  "image/jpg": ".jpg",
+  "image/png": ".png",
+  "image/jxl": ".jxl"
+};
 var apiKeys = [];
 var keyIndex = 0;
 function parseApiKeys(raw) {
   if (!raw || typeof raw !== "string") return [];
   return raw.split(/[,;]/).map((s) => s.trim()).filter(Boolean);
+}
+function normalizeFormat(format) {
+  if (!format || typeof format !== "string") {
+    throw new Error("\u7F3A\u5C11\u76EE\u6807\u683C\u5F0F");
+  }
+  const raw = format.toLowerCase().trim();
+  if (raw.indexOf("image/") === 0) {
+    return raw;
+  }
+  if (raw.charAt(0) === ".") {
+    const key = raw.slice(1);
+    if (FORMAT_ALIASES[key]) {
+      return FORMAT_ALIASES[key];
+    }
+  }
+  if (FORMAT_ALIASES[raw]) {
+    return FORMAT_ALIASES[raw];
+  }
+  throw new Error(
+    `\u4E0D\u652F\u6301\u7684\u76EE\u6807\u683C\u5F0F: ${format}\uFF0C\u652F\u6301 avif / webp / jpg / png / jxl`
+  );
+}
+function extensionForFormat(format) {
+  const mime = normalizeFormat(format);
+  const ext = MIME_TO_EXT[mime];
+  if (ext) {
+    return ext;
+  }
+  const parts = mime.split("/");
+  return "." + parts[parts.length - 1];
+}
+function resolveConvertOutputPath(input, output, format) {
+  const newExt = extensionForFormat(format);
+  const stem = (0, import_node_path.basename)(input, (0, import_node_path.extname)(input));
+  if (!output) {
+    return (0, import_node_path.join)((0, import_node_path.dirname)(input), stem + newExt);
+  }
+  const trimmed = output.replace(/[\\/]+$/, "");
+  const outExt = (0, import_node_path.extname)(trimmed).toLowerCase();
+  if (!outExt) {
+    return (0, import_node_path.join)(trimmed, stem + newExt);
+  }
+  return trimmed;
 }
 function setApiKey(keys) {
   const list = Array.isArray(keys) ? keys.flatMap((k) => parseApiKeys(k)) : parseApiKeys(keys);
@@ -32629,7 +32688,22 @@ function shouldTryNextKey(err) {
   }
   return false;
 }
-async function compressWithKey(input, opts, index) {
+function assertInputExt(input) {
+  const ext = (0, import_node_path.extname)(input).toLowerCase();
+  if (!ALLOWED_EXT.has(ext)) {
+    throw new Error(
+      `\u4E0D\u652F\u6301\u7684\u8F93\u5165\u683C\u5F0F: ${ext}\uFF0C\u652F\u6301 .png / .jpg / .jpeg / .webp / .avif`
+    );
+  }
+}
+function assertApiKeys() {
+  if (apiKeys.length === 0) {
+    throw new Error(
+      "\u7F3A\u5C11 TinyPNG API Key\uFF08\u73AF\u5883\u53D8\u91CF TINIFY_API_KEY\uFF0C\u6216 CLI \u7684 -k\uFF09"
+    );
+  }
+}
+async function processImageWithKey(input, opts, index) {
   activateKey(index);
   const before = (await (0, import_promises.readFile)(input)).length;
   let source = import_tinify.default.fromFile(input);
@@ -32640,7 +32714,17 @@ async function compressWithKey(input, opts, index) {
     if (opts.height) resize.height = opts.height;
     source = source.resize(resize);
   }
-  const output = opts.output || input;
+  let output;
+  let formatLabel = null;
+  let mimeType = null;
+  if (opts.format) {
+    mimeType = normalizeFormat(opts.format);
+    formatLabel = mimeType.split("/")[1];
+    source = source.convert({ type: mimeType });
+    output = resolveConvertOutputPath(input, opts.output, opts.format);
+  } else {
+    output = opts.output || input;
+  }
   await source.toFile(output);
   const after = (await (0, import_promises.readFile)(output)).length;
   return {
@@ -32652,27 +32736,18 @@ async function compressWithKey(input, opts, index) {
     ratio: before ? (before - after) / before : 0,
     compressionCount: import_tinify.default.compressionCount,
     keyIndex: index + 1,
-    keyCount: apiKeys.length
+    keyCount: apiKeys.length,
+    format: formatLabel,
+    mimeType
   };
 }
-async function compressFile(input, opts = {}) {
-  const ext = (0, import_node_path.extname)(input).toLowerCase();
-  if (!ALLOWED_EXT.has(ext)) {
-    throw new Error(
-      `\u4E0D\u652F\u6301\u7684\u683C\u5F0F: ${ext}\uFF0C\u652F\u6301 .png / .jpg / .jpeg / .webp / .avif`
-    );
-  }
-  if (apiKeys.length === 0) {
-    throw new Error(
-      "\u7F3A\u5C11 TinyPNG API Key\uFF08\u73AF\u5883\u53D8\u91CF TINIFY_API_KEY\uFF0C\u6216 CLI \u7684 -k\uFF09"
-    );
-  }
+async function runWithKeyRotation(input, opts) {
   const start = keyIndex;
   let lastError = null;
   for (let attempt = 0; attempt < apiKeys.length; attempt++) {
     const index = (start + attempt) % apiKeys.length;
     try {
-      const result = await compressWithKey(input, opts, index);
+      const result = await processImageWithKey(input, opts, index);
       keyIndex = (index + 1) % apiKeys.length;
       return result;
     } catch (err) {
@@ -32685,21 +32760,62 @@ async function compressFile(input, opts = {}) {
   }
   throw lastError;
 }
+async function compressFile(input, opts = {}) {
+  assertInputExt(input);
+  assertApiKeys();
+  return runWithKeyRotation(input, opts);
+}
+async function convertFile(input, opts = {}) {
+  if (!opts.format) {
+    throw new Error("convertFile \u9700\u8981 format \u53C2\u6570\uFF08avif / webp / jpg / png / jxl\uFF09");
+  }
+  assertInputExt(input);
+  assertApiKeys();
+  normalizeFormat(opts.format);
+  return runWithKeyRotation(input, opts);
+}
+async function convertToFormats(input, opts = {}) {
+  const formats = opts.formats;
+  if (!formats || !Array.isArray(formats) || formats.length === 0) {
+    throw new Error("convertToFormats \u9700\u8981 formats \u6570\u7EC4\uFF0C\u5982 ['avif','webp','jpg']");
+  }
+  const results = [];
+  for (let i = 0; i < formats.length; i++) {
+    const format = formats[i];
+    const output = opts.outputDir ? (0, import_node_path.join)(
+      opts.outputDir.replace(/[\\/]+$/, ""),
+      (0, import_node_path.basename)(input, (0, import_node_path.extname)(input)) + extensionForFormat(format)
+    ) : void 0;
+    const r = await convertFile(input, {
+      format,
+      output,
+      width: opts.width,
+      height: opts.height
+    });
+    results.push(r);
+  }
+  return results;
+}
 
 // src/mcp.js
 setApiKey(process.env.TINIFY_API_KEY);
 var server = new McpServer({
   name: "tinymcp",
-  version: "2.1.1"
+  version: "2.2.0"
 });
 function kb(n) {
   return (n / 1024).toFixed(1) + "KB";
 }
 function formatResult(r) {
-  let text = `\u538B\u7F29\u5B8C\u6210
+  const title = r.format ? "\u683C\u5F0F\u8F6C\u6362\u5B8C\u6210" : "\u538B\u7F29\u5B8C\u6210";
+  let text = `${title}
 - \u8F93\u5165: ${r.input}
 - \u8F93\u51FA: ${r.output}
 - \u4F53\u79EF: ${kb(r.before)} \u2192 ${kb(r.after)} (-${(r.ratio * 100).toFixed(1)}%)`;
+  if (r.format) {
+    text += `
+- \u76EE\u6807\u683C\u5F0F: ${r.format}`;
+  }
   if (r.keyCount > 1) {
     text += `
 - \u4F7F\u7528 Key: #${r.keyIndex}/${r.keyCount}`;
@@ -32708,10 +32824,11 @@ function formatResult(r) {
 - \u672C\u6708\u5DF2\u7528: ${r.compressionCount} \u6B21\uFF08\u8BE5 Key\uFF0C\u514D\u8D39\u989D\u5EA6 500/\u6708\uFF09`;
   return text;
 }
+var formatSchema = string2().describe("\u76EE\u6807\u683C\u5F0F\uFF1Aavif | webp | jpg | png | jxl");
 server.registerTool(
   "compress_local_image",
   {
-    description: "\u7528 TinyPNG \u5B98\u65B9 API \u538B\u7F29\u672C\u5730 PNG/JPG/WebP/AVIF\u3002\u9700 TINIFY_API_KEY\uFF08\u591A\u4E2A Key \u7528 , \u6216 ; \u5206\u9694\uFF09\u3002",
+    description: "\u7528 TinyPNG \u5B98\u65B9 API \u538B\u7F29\u672C\u5730 PNG/JPG/WebP/AVIF\uFF08\u4FDD\u6301\u539F\u683C\u5F0F\uFF09\u3002\u9700 TINIFY_API_KEY\u3002",
     inputSchema: {
       inputPath: string2().describe("\u8F93\u5165\u56FE\u7247\u7684\u7EDD\u5BF9\u8DEF\u5F84\uFF0C\u5982 C:/Users/xxx/Desktop/a.png"),
       outputPath: string2().optional().describe("\u8F93\u51FA\u8DEF\u5F84\uFF08\u53EF\u9009\uFF09\u3002\u7701\u7565\u5219\u8986\u76D6\u539F\u6587\u4EF6"),
@@ -32735,7 +32852,7 @@ server.registerTool(
 server.registerTool(
   "compress_images_glob",
   {
-    description: "\u7528 TinyPNG \u5B98\u65B9 API \u6309 glob \u6279\u91CF\u538B\u7F29\u3002\u9700 TINIFY_API_KEY\uFF08\u591A\u4E2A Key \u7528 , \u6216 ; \u5206\u9694\uFF09\u3002",
+    description: "\u7528 TinyPNG \u5B98\u65B9 API \u6309 glob \u6279\u91CF\u538B\u7F29\uFF08\u4FDD\u6301\u539F\u683C\u5F0F\uFF09\u3002\u9700 TINIFY_API_KEY\u3002",
     inputSchema: {
       patterns: array(string2()).describe("glob \u6A21\u5F0F\u6570\u7EC4\uFF0C\u8DEF\u5F84\u5EFA\u8BAE\u7528\u6B63\u659C\u6760"),
       outputDir: string2().optional().describe("\u8F93\u51FA\u76EE\u5F55\uFF08\u53EF\u9009\uFF09\u3002\u7701\u7565\u5219\u8986\u76D6\u5404\u539F\u6587\u4EF6"),
@@ -32774,6 +32891,122 @@ server.registerTool(
       return {
         isError: true,
         content: [{ type: "text", text: `\u6279\u91CF\u538B\u7F29\u5931\u8D25: ${e.message}` }]
+      };
+    }
+  }
+);
+server.registerTool(
+  "convert_local_image",
+  {
+    description: "\u7528 TinyPNG \u5B98\u65B9 API \u5C06\u672C\u5730\u56FE\u7247\u8F6C\u4E3A avif/webp/jpg/png/jxl \u5E76\u538B\u7F29\u3002\u672A\u6307\u5B9A\u8F93\u51FA\u65F6\u540C\u76EE\u5F55\u6362\u6269\u5C55\u540D\u3001\u4FDD\u7559\u539F\u56FE\u3002\u6BCF\u79CD\u683C\u5F0F\u8BA1 1 \u6B21 API \u989D\u5EA6\u3002",
+    inputSchema: {
+      inputPath: string2().describe("\u8F93\u5165\u56FE\u7247\u7EDD\u5BF9\u8DEF\u5F84"),
+      format: formatSchema,
+      outputPath: string2().optional().describe("\u8F93\u51FA\u6587\u4EF6\u6216\u76EE\u5F55\uFF08\u53EF\u9009\uFF09\u3002\u7701\u7565\u5219\u540C\u76EE\u5F55\u6362\u6269\u5C55\u540D"),
+      width: number2().optional().describe("\u76EE\u6807\u5BBD\u5EA6\uFF08\u50CF\u7D20\uFF0C\u53EF\u9009\uFF09"),
+      height: number2().optional().describe("\u76EE\u6807\u9AD8\u5EA6\uFF08\u50CF\u7D20\uFF0C\u53EF\u9009\uFF09")
+    }
+  },
+  async ({ inputPath, format, outputPath, width, height }) => {
+    try {
+      const r = await convertFile(inputPath, {
+        format,
+        output: outputPath,
+        width,
+        height
+      });
+      return { content: [{ type: "text", text: formatResult(r) }] };
+    } catch (e) {
+      return {
+        isError: true,
+        content: [{ type: "text", text: `\u683C\u5F0F\u8F6C\u6362\u5931\u8D25: ${e.message}` }]
+      };
+    }
+  }
+);
+server.registerTool(
+  "convert_local_image_formats",
+  {
+    description: "\u4ECE\u4E00\u5F20\u539F\u56FE\u5BFC\u51FA\u591A\u79CD\u683C\u5F0F\uFF08\u5982 avif+webp+jpg\uFF09\uFF0C\u7528\u4E8E\u591A\u683C\u5F0F\u5206\u53D1\u7D20\u6750\u51C6\u5907\u3002\u6BCF\u79CD\u683C\u5F0F\u5404\u8BA1 1 \u6B21 API \u989D\u5EA6\u3002",
+    inputSchema: {
+      inputPath: string2().describe("\u8F93\u5165\u56FE\u7247\u7EDD\u5BF9\u8DEF\u5F84"),
+      formats: array(string2()).describe('\u76EE\u6807\u683C\u5F0F\u6570\u7EC4\uFF0C\u5982 ["avif","webp","jpg"]'),
+      outputDir: string2().optional().describe("\u8F93\u51FA\u76EE\u5F55\uFF08\u53EF\u9009\uFF09\u3002\u7701\u7565\u5219\u4E0E\u8F93\u5165\u540C\u76EE\u5F55"),
+      width: number2().optional().describe("\u76EE\u6807\u5BBD\u5EA6\uFF08\u50CF\u7D20\uFF0C\u53EF\u9009\uFF09"),
+      height: number2().optional().describe("\u76EE\u6807\u9AD8\u5EA6\uFF08\u50CF\u7D20\uFF0C\u53EF\u9009\uFF09")
+    }
+  },
+  async ({ inputPath, formats, outputDir, width, height }) => {
+    try {
+      if (outputDir) await (0, import_promises2.mkdir)(outputDir, { recursive: true });
+      const results = await convertToFormats(inputPath, {
+        formats,
+        outputDir,
+        width,
+        height
+      });
+      const lines = results.map(function(r) {
+        return `\u2713 ${r.format}  \u2192 ${r.output}  ${kb(r.before)} \u2192 ${kb(r.after)}`;
+      });
+      const last = results[results.length - 1];
+      lines.push(
+        `
+\u5B8C\u6210 ${results.length} \u79CD\u683C\u5F0F\u3002\u672C\u6708\u5DF2\u7528 ${last.compressionCount} \u6B21\uFF08\u6700\u540E\u4E00\u5F20\u6240\u7528 Key\uFF09\u3002`
+      );
+      return { content: [{ type: "text", text: lines.join("\n") }] };
+    } catch (e) {
+      return {
+        isError: true,
+        content: [{ type: "text", text: `\u591A\u683C\u5F0F\u5BFC\u51FA\u5931\u8D25: ${e.message}` }]
+      };
+    }
+  }
+);
+server.registerTool(
+  "convert_images_glob",
+  {
+    description: "\u6309 glob \u6279\u91CF\u5C06\u56FE\u7247\u8F6C\u4E3A\u6307\u5B9A\u683C\u5F0F\u3002\u672A\u6307\u5B9A\u8F93\u51FA\u76EE\u5F55\u65F6\u5404\u6587\u4EF6\u540C\u76EE\u5F55\u6362\u6269\u5C55\u540D\u3001\u4FDD\u7559\u539F\u56FE\u3002",
+    inputSchema: {
+      patterns: array(string2()).describe("glob \u6A21\u5F0F\u6570\u7EC4"),
+      format: formatSchema,
+      outputDir: string2().optional().describe("\u8F93\u51FA\u76EE\u5F55\uFF08\u53EF\u9009\uFF09\u3002\u7701\u7565\u5219\u5404\u6587\u4EF6\u540C\u76EE\u5F55\u6362\u6269\u5C55\u540D"),
+      width: number2().optional().describe("\u76EE\u6807\u5BBD\u5EA6\uFF08\u50CF\u7D20\uFF0C\u53EF\u9009\uFF09"),
+      height: number2().optional().describe("\u76EE\u6807\u9AD8\u5EA6\uFF08\u50CF\u7D20\uFF0C\u53EF\u9009\uFF09")
+    }
+  },
+  async ({ patterns, format, outputDir, width, height }) => {
+    try {
+      const files = await (0, import_fast_glob.default)(patterns, { onlyFiles: true, absolute: true });
+      if (files.length === 0) {
+        return {
+          isError: true,
+          content: [{ type: "text", text: "\u6CA1\u5339\u914D\u5230\u4EFB\u4F55\u6587\u4EF6" }]
+        };
+      }
+      if (outputDir) await (0, import_promises2.mkdir)(outputDir, { recursive: true });
+      const lines = [];
+      let lastCount = 0;
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        const output = outputDir ? (0, import_node_path2.join)(outputDir, (0, import_node_path2.basename)(f, (0, import_node_path2.extname)(f)) + extensionForFormat(format)) : void 0;
+        const r = await convertFile(f, {
+          format,
+          output,
+          width,
+          height
+        });
+        lastCount = r.compressionCount;
+        lines.push(`\u2713 ${f}  \u2192 ${r.output}`);
+      }
+      lines.push(
+        `
+\u5B8C\u6210 ${files.length} \u5F20\uFF0C\u76EE\u6807\u683C\u5F0F ${format}\u3002\u672C\u6708\u5DF2\u7528 ${lastCount} \u6B21\u3002`
+      );
+      return { content: [{ type: "text", text: lines.join("\n") }] };
+    } catch (e) {
+      return {
+        isError: true,
+        content: [{ type: "text", text: `\u6279\u91CF\u8F6C\u6362\u5931\u8D25: ${e.message}` }]
       };
     }
   }

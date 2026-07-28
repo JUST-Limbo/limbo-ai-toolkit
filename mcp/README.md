@@ -24,9 +24,9 @@
 
 ### 功能说明
 
-通过 [TinyPNG 官方 Developer API](https://tinypng.com/developers) 压缩本地 PNG/JPG/WebP/AVIF。
+通过 [TinyPNG 官方 Developer API](https://tinypng.com/developers) 压缩或转换本地 PNG/JPG/WebP/AVIF。
 
-- **MCP Tools**：`compress_local_image`、`compress_images_glob`
+- **MCP Tools**：`compress_*`、`convert_*`（含多格式导出）
 - **CLI**：`dist/tinymcp-cli.cjs`（命令名 `tinymcp`）
 - **前提**：`TINIFY_API_KEY`（[申请 Key](https://tinypng.com/developers)；多个 Key 用 `,` 或 `;` 分隔）
 - **额度**：免费账户约 500 次/月（以官网为准）
@@ -80,6 +80,7 @@
 
 | 版本 | 说明 |
 |------|------|
+| 2.2.0 | 格式转换（avif/webp/jpg/png/jxl）；MCP convert_* Tools；CLI `-f` / `-F` |
 | 2.1.1 | MCP 默认覆盖原图；取用统一为 `.cursor/tinymcp/` |
 | 2.1.0 | 支持多 `TINIFY_API_KEY`（`,` / `;` 分隔），轮询与失败切换 |
 | 2.0.0 | 官方 API；目录与产物更名为 **tinymcp** |

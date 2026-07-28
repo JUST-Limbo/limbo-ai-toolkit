@@ -30,7 +30,7 @@ mcp/         可复用 MCP Server（每个一子目录：package.json + README�
 
 | 名称 | 说明 |
 |------|------|
-| `tinymcp` | 通过 TinyPNG 官方 API 压缩 PNG/JPG/WebP/AVIF；MCP Tools + CLI；须 `TINIFY_API_KEY` |
+| `tinymcp` | 通过 TinyPNG 官方 API 压缩或转换 PNG/JPG/WebP/AVIF；MCP Tools + CLI；须 `TINIFY_API_KEY` |
 
 功能详情与 Version Notes：Skill 见各 `SKILL.md`；Rule 见 [rules/README.md](rules/README.md)；MCP 见 [mcp/README.md](mcp/README.md)。来源 / 实现参考标注见 [AGENTS.md](AGENTS.md#实现参考标注readme--正文)。
 
