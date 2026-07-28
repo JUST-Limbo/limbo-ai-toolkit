@@ -1,6 +1,36 @@
 # rules — 对外 Rule 库
 
-本目录存放面向**其它项目**、可复用的规则与编码规约。创建、维护与版本治理见 [AGENTS.md](../AGENTS.md#rule创建维护与调用)；取用方式见根 [README.md](../README.md#取用方式)。
+本目录存放面向**其它项目**、可复用的规则与编码规约。创建、维护与版本治理见 [AGENTS.md](../AGENTS.md#rule创建维护与调用)。
+
+## 取用方式
+
+从 [`rules/<name>.md`](.) 复制到目标项目或用户级配置：
+
+1. 复制正文（**去掉**本仓库治理用 YAML frontmatter），**保留**文末 `<!-- x-source-* -->` 注释。
+2. 按目标工具补写必要的 frontmatter（如 Cursor 的 `alwaysApply`、`globs`）。
+3. **不要**把本 README 里的功能说明、Version Notes 抄进规则正文。
+
+**常见路径**（`<name>` 替换为规则文件名，不含 `.md`）：
+
+| 工具 | 目标路径 | 加载配置 |
+|------|---------|---------|
+| Claude Code | `~/.claude/CLAUDE.md` | 用户级自动加载 |
+| Cursor | `.cursor/rules/<name>.mdc` | `alwaysApply: true` 或 `globs` |
+| Claude Code（项目内） | `.claude/rules/<name>.md` | 无 `paths:` 即全局 |
+| GitHub Copilot | 合并进 `.github/copilot-instructions.md` | 仓库级自动加载 |
+
+Cursor 全局 Rule 的 frontmatter 示例：
+
+```yaml
+---
+description: Global always-on baseline for AI agents
+alwaysApply: true
+---
+```
+
+**对照更新**：读取本地规则文末注释中的 `x-source-url`（或 `x-source-repo` + `x-source-path`），与上游 diff；本地 `x-rule-version` 低于上游时再合并更新。
+
+与专题 Rule 冲突时，以**更具体**的目录/项目 Rule 为准（详见 [AGENTS.md §5](../AGENTS.md#5-加载优先级与冲突)）。
 
 ## 规则清单
 
@@ -34,7 +64,7 @@
 
 #### 使用方法
 
-规则正文：[`agent-global-baseline.md`](agent-global-baseline.md)。复制、frontmatter 调整、对照上游更新见根 [README.md §取用方式](../README.md#取用方式)。
+规则正文：[`agent-global-baseline.md`](agent-global-baseline.md)。复制、frontmatter 调整、对照上游更新见上文 [取用方式](#取用方式)。
 
 #### Version Notes
 
@@ -79,7 +109,7 @@
 
 #### 使用方法
 
-规则正文：[`style-reference-clarify.md`](style-reference-clarify.md)。复制、frontmatter 调整、对照上游更新见根 [README.md §取用方式](../README.md#取用方式)。
+规则正文：[`style-reference-clarify.md`](style-reference-clarify.md)。复制、frontmatter 调整、对照上游更新见上文 [取用方式](#取用方式)。
 
 取用到 Cursor 时建议 `alwaysApply: true`，以便自然语言触发时也能拦住「先改后问」。
 

@@ -1,6 +1,6 @@
 # 可复用 AI 资产库
 
-集中维护 Skill / Rule 等，供各项目取用。
+集中维护 Skill / Rule / MCP 等，供各项目取用。
 
 ## 目录一览
 
@@ -10,147 +10,30 @@ rules/       可复用 Rule（编码规约、流程约束等）
 mcp/         可复用 MCP Server（每个一子目录：package.json + README）
 ```
 
-## Skills
+## 对外资产清单
 
-### `generate-color-palette`
+### Skills
 
-- 路径：[`skills/generate-color-palette/`](skills/generate-color-palette/SKILL.md)
-- 功能：扫描前端源码中的 hex / rgb / oklch 颜色值，去重后按色谱分组，生成交互式 HTML 色板（搜索、Tab 筛选、点击复制）。
-- Use example：
+| 名称 | 说明 |
+|------|------|
+| `generate-color-palette` | 扫描前端源码中的 hex / rgb / oklch 颜色值，去重后按色谱分组，生成交互式 HTML 色板（搜索、Tab 筛选、点击复制） |
+| `generate-style-catalog` | 扫描 Vue 功能模块目录，从 SFC `<style>` 块提取 CSS 规则，按组件分组，生成交互式 HTML 样式目录（属性分类 Tab、搜索、覆盖复制 / 追加汇总） |
+| `git-branch-merge-flow` | 将当前分支按固定流程同步到目标分支：`fetch` → 对齐 `origin/*` → `push` → checkout 目标 → merge `origin/<当前>` → 推送；冲突时停在当前阶段分支 |
 
-```text
-/generate-color-palette 扫描 frontend/src 生成色板
-```
+### Rules
 
-```text
-帮我盘点项目颜色，输出 HTML 报告
-```
+| 名称 | 作用域 | 说明 |
+|------|--------|------|
+| `agent-global-baseline` | 全局 | 跨项目 Agent 基线（简体中文、代码原则、目录预检查、Git 临时 proxy 等） |
+| `style-reference-clarify` | 全局 | 参考某处样式实现另一处时，先读参考源、一轮多选确认必抄样式点后再改代码 |
 
-### `generate-style-catalog`
+### MCP
 
-- 路径：[`skills/generate-style-catalog/`](skills/generate-style-catalog/SKILL.md)
-- 功能：扫描 Vue 功能模块目录，从 SFC `<style>` 块提取 CSS 规则，按组件分组，生成交互式 HTML 样式目录（属性分类 Tab、搜索、覆盖复制 / 追加汇总）。
-- Use example：
+| 名称 | 说明 |
+|------|------|
+| `tinymcp` | 通过 TinyPNG 官方 API 压缩 PNG/JPG/WebP/AVIF；MCP Tools + CLI；须 `TINIFY_API_KEY` |
 
-```text
-/generate-style-catalog 扫描 features/checkout 生成样式目录
-```
-
-```text
-帮我盘点登录模块的 CSS 样式特征，输出可批量复制的 HTML
-```
-
-### `git-branch-merge-flow`
-
-- 路径：[`skills/git-branch-merge-flow/`](skills/git-branch-merge-flow/SKILL.md)
-- 功能：将当前分支的改动按固定流程同步到目标分支。先校验来源≠目标；在 **CurrentBranch** 上：`fetch` → 必要时提交 → 若落后则对齐 `origin/<当前>` → `push`；在 **TargetBranch** 上：checkout → `fetch` → 对齐 `origin/<目标>`（若需要）→ 以 `origin/<当前>` 为来源合并 → 推送目标分支；若无冲突则切回之前的分支，冲突则停在当前阶段所在分支等待处理。
-- Use example：
-
-```text
-/git-branch-merge-flow 合并到dev
-```
-
-```text
-/git-branch-merge-flow 合并到release/yyy
-```
-
-## MCP
-
-`mcp/` 下存放可被其它项目复用的 MCP Server。清单、接入步骤与 Version Notes 见 [mcp/README.md](mcp/README.md)。
-
-### 取用方式
-
-1. 从 `mcp/tinymcp/dist/` 复制 `tinymcp.cjs` 到目标项目 **`.cursor/tinymcp/`**（或 `.claude/tinymcp/`）
-2. 在 `.cursor/mcp.json` 配置 `args: [".cursor/tinymcp/tinymcp.cjs"]` 与 `TINIFY_API_KEY`
-3. 重启 Cursor
-
-无需 `npm install`，不必复制源码。本仓维护者开发与构建见 `mcp/tinymcp/`。
-
-### `tinymcp`
-
-- 路径：[`mcp/tinymcp/`](mcp/tinymcp/README.md)
-- 版本：**2.1.1**
-- 功能：通过 [TinyPNG 官方 API](https://tinypng.com/developers) 压缩 PNG/JPG/WebP/AVIF。MCP Tools：`compress_local_image`、`compress_images_glob`；CLI 命令 `tinymcp`。须配置 **`TINIFY_API_KEY`**（多个 Key 用 `,` 或 `;` 分隔）。免费约 500 次/月/Key。
-- 详细说明：[`mcp/tinymcp/README.md`](mcp/tinymcp/README.md)
-- 免责声明：[`mcp/tinymcp/DISCLAIMER.md`](mcp/tinymcp/DISCLAIMER.md)
-- Use example：
-
-```text
-帮我把 C:/Users/xxx/Desktop/logo.png 压缩一下
-```
-
-```text
-在 .cursor/mcp.json 填入 TINIFY_API_KEY，重启 Cursor 后用 tinymcp 压图
-```
-
-```powershell
-$env:TINIFY_API_KEY = "你的KEY"
-node .cursor/tinymcp/tinymcp-cli.cjs "assets/**/*.png" -o dist -w 800
-```
-
-## Rules
-
-`rules/` 下存放可被其它项目复用的规则与编码规约，按语言/框架或主题切分。功能说明与 Version Notes 见 [rules/README.md](rules/README.md)；创建、维护与版本治理见 [AGENTS.md](AGENTS.md#rule创建维护与调用)。
-
-### 取用方式
-
-从 [`rules/<name>.md`](rules/) 复制到目标项目或用户级配置：
-
-1. 复制正文（**去掉**本仓库治理用 YAML frontmatter），**保留**文末 `<!-- x-source-* -->` 注释。
-2. 按目标工具补写必要的 frontmatter（如 Cursor 的 `alwaysApply`、`globs`）。
-3. **不要**把 [rules/README.md](rules/README.md) 里的功能说明、Version Notes 抄进规则正文。
-
-**常见路径**（`<name>` 替换为规则文件名，不含 `.md`）：
-
-| 工具 | 目标路径 | 加载配置 |
-|------|---------|---------|
-| Claude Code | `~/.claude/CLAUDE.md` | 用户级自动加载 |
-| Cursor | `.cursor/rules/<name>.mdc` | `alwaysApply: true` 或 `globs` |
-| Claude Code（项目内） | `.claude/rules/<name>.md` | 无 `paths:` 即全局 |
-| GitHub Copilot | 合并进 `.github/copilot-instructions.md` | 仓库级自动加载 |
-
-Cursor 全局 Rule 的 frontmatter 示例：
-
-```yaml
----
-description: Global always-on baseline for AI agents
-alwaysApply: true
----
-```
-
-**对照更新**：读取本地规则文末注释中的 `x-source-url`（或 `x-source-repo` + `x-source-path`），与上游 diff；本地 `x-rule-version` 低于上游时再合并更新。
-
-与专题 Rule 冲突时，以**更具体**的目录/项目 Rule 为准（详见 [AGENTS.md §5](AGENTS.md#5-加载优先级与冲突)）。
-
-### `agent-global-baseline`
-
-- 路径：[`rules/agent-global-baseline.md`](rules/agent-global-baseline.md)
-- 作用域：**全局**（始终加载，不绑定文件 glob）
-- 功能：跨项目 Agent 全局基线（简体中文、代码原则、目录预检查、Git 临时 proxy 等）。详细说明见 [rules/README.md](rules/README.md#agent-global-baseline)。
-- Use example：
-
-```text
-复制 agent-global-baseline.md（去掉 YAML 头，保留文末来源注释）到 ~/.claude/CLAUDE.md
-```
-
-```text
-复制正文到 .cursor/rules/agent-global-baseline.mdc，设 alwaysApply: true
-```
-
-### `style-reference-clarify`
-
-- 路径：[`rules/style-reference-clarify.md`](rules/style-reference-clarify.md)
-- 作用域：**全局**（始终加载，不绑定文件 glob）
-- 功能：用户要求参考某处样式实现另一处时，先读参考源、再一轮多选确认必抄样式点，随即改目标代码；选了必抄，没选不代表不抄。五类高权重分组（字体/背景/边框/布局/形式）仅为出题参考，问哪几组由参考实现决定。详细说明见 [rules/README.md](rules/README.md#style-reference-clarify)。
-- Use example：
-
-```text
-参考首页 Hero 的样式做活动页顶栏
-```
-
-```text
-复制 style-reference-clarify.md（去掉 YAML 头，保留文末来源注释）到 .cursor/rules/style-reference-clarify.mdc，设 alwaysApply: true
-```
+功能详情与 Version Notes：Skill 见各 `SKILL.md`；Rule 见 [rules/README.md](rules/README.md)；MCP 见 [mcp/README.md](mcp/README.md)。来源 / 实现参考标注见 [AGENTS.md](AGENTS.md#实现参考标注readme--正文)。
 
 ---
 

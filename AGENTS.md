@@ -74,7 +74,7 @@ x-source-version: 2.1.0
 - **本仓库原创**，或实现参考来自私有项目但对外分发时：**不写**来源 / 实现参考行。
 - 与 `x-source-repo` 无关：后者仍按上文对本仓库或**公开**上游仓库填写，不因本条规定省略。
 
-根 `README.md` 的对外资产清单与 Skill / Rule 正文中的来源、实现参考说明，均遵守本节；本仓库原创或参考私有实现时不写。
+根 `README.md`「对外资产清单」各类型表格与 Skill / Rule 正文中的来源、实现参考说明，均遵守本节；本仓库原创或参考私有实现时不写。
 
 ### 新增一个 Skill
 
@@ -82,7 +82,7 @@ x-source-version: 2.1.0
 2. 填写 `SKILL.md`：
    - YAML 头：`name`、英文 `description`（便于工具检索）、`x-skill-version`（语义化版本，从 `1.0.0` 起）、**`x-source-repo`**（及按需的 `x-source-path`、`x-source-version`，见上文「来源仓库标注」）。
    - 正文必须含**中文的「功能说明」与「使用方法」**，英文 description 不能替代中文说明；功能说明中如需写实现参考，遵守上文「实现参考标注」。
-3. 在根 `README.md` 的「对外 Skills」清单中按现有风格补一条（功能 + use example）；仅当参考**公开开源**项目时补充来源或实现参考说明。
+3. 在根 `README.md`「对外资产清单 → Skills」表格中补一行（名称、说明）；仅当参考**公开开源**项目时在说明列补充来源或实现参考。
 
 Skill 的版本治理、改码注释、旧版本痕迹处理等细则见下文「Skill：创建、维护与调用」。
 
@@ -94,8 +94,8 @@ Skill 的版本治理、改码注释、旧版本痕迹处理等细则见下文�
 ### 新增 Rule / MCP / Agent / 命令
 
 - 放进对应顶层目录（`rules/`、`mcp/`、`agents/`、`commands/`），目录尚不存在时新建。
-- 同样要带清晰的中文说明、**来源仓库标注**（见上文），并在 README 相应清单补条目。
-- Rule 的 `.md` 正文末尾加 HTML 来源注释（`<!-- x-source-repo` / `x-source-path` / `x-rule-version` / `x-source-url -->`），取用方去掉 frontmatter 复制后仍能对照上游更新；各 Rule 的功能说明与 Version Notes 写在 `rules/README.md`，通用取用方式见根 [README.md](README.md#取用方式)。
+- 同样要带清晰的中文说明、**来源仓库标注**（见上文），并在根 `README.md` 对应类型表格（Skills / Rules / MCP）中补一行。
+- Rule 的 `.md` 正文末尾加 HTML 来源注释（`<!-- x-source-repo` / `x-source-path` / `x-rule-version` / `x-source-url -->`），取用方去掉 frontmatter 复制后仍能对照上游更新；各 Rule 的功能说明与 Version Notes 写在 `rules/README.md`，通用取用方式见 [rules/README.md](rules/README.md#取用方式)。
 - Rule 的版本治理、取用同步、冲突优先级等细则见下文「Rule：创建、维护与调用」。
 
 ---
@@ -207,9 +207,9 @@ x-source-path: skills/某个-skill
 
 ### 6. README 同步维护
 
-- 仓库根目录的 `README.md` 用于简短说明每个 Skill 的**功能**与**use example**；来源 / 实现参考见上文「实现参考标注」。
-- 后续每当新增 Skill（新增一个可用的 `SKILL.md` 主目录）时，Agent **必须**按 README 现有风格自动补充对应条目。
-- 若 Skill 被删除或重命名，README 中对应条目也应同步更新，避免文档与仓库现状不一致。
+- 仓库根目录的 `README.md`「对外资产清单」按类型分表（**Skills**、**Rules**、**MCP**），各表列字段见 README 现有格式；来源 / 实现参考见上文「实现参考标注」。
+- 后续每当新增 Skill（新增一个可用的 `SKILL.md` 主目录）时，Agent **必须**在 Skills 表格中补一行。
+- 若 Skill 被删除或重命名，README 表格中对应行也应同步更新，避免文档与仓库现状不一致。
 
 ---
 
@@ -230,7 +230,7 @@ x-source-path: skills/某个-skill
 - 在规则清单表补一行（文件、作用域、简要说明）。
 - 在该 Rule 条目下写**中文**说明，至少包含：
   - **功能说明**：该 Rule 解决什么问题、适用场景、不负责的范围（如有）；如需写实现参考，遵守 [AGENTS.md §实现参考标注](../AGENTS.md#实现参考标注readme--正文)。
-  - **使用方法**：链到根 [README.md](README.md#取用方式) 的通用取用方式；若该 Rule 有特有用法（非通用路径/frontmatter），在此补充。
+  - **使用方法**：链到 [rules/README.md](rules/README.md#取用方式) 的通用取用方式；若该 Rule 有特有用法（非通用路径/frontmatter），在此补充。
   - **Version Notes**：各已发布版本的变更摘要。
 
 英文 `description` 仍建议保留，便于工具检索；但**不能**仅用英文替代上述中文说明。
@@ -285,7 +285,7 @@ scope: global
 - **对外 Rule**（`rules/`）：写给**别的项目**复用；正文可复制到目标仓库或用户级配置路径。
 - **项目本地 Rule**（`.cursor/rules/`、`.claude/rules/` 等）：只约束**本仓库**内 AI 工具行为；见上文「二、项目本地配置」的同步要求——团队用到的每个工具各放一份，正文一致。
 
-通用取用路径、复制步骤与对照更新见根目录 [README.md](README.md#取用方式)（「Rules → 取用方式」）。从对外 Rule 复制时，**不要**把 `rules/README.md` 里的功能说明、Version Notes 抄进项目本地 Rule 正文。
+通用取用路径、复制步骤与对照更新见 [rules/README.md](rules/README.md#取用方式)。从对外 Rule 复制时，**不要**把 `rules/README.md` 里的功能说明、Version Notes 抄进项目本地 Rule 正文。
 
 ### 4. 取用方仓库中存在旧版本 Rule 痕迹时的处理
 
@@ -306,7 +306,7 @@ scope: global
 ### 6. README 同步维护
 
 - **`rules/README.md`**：每条对外 Rule 须有清单条目，以及功能说明、Version Notes；新增 / 删除 / 重命名 Rule 时同步更新。
-- **根目录 `README.md`**：维护「Rules → 取用方式」；每条 Rule 补简要说明（功能 + use example + 指向 `rules/README.md` 详情）；来源 / 实现参考见上文「实现参考标注」；Rule 删除或重命名时同步更新。
+- **根目录 `README.md`**：维护「对外资产清单」各类型表格；Rule 在 Rules 表格中补一行（说明列可链到 `rules/README.md` 详情）；来源 / 实现参考见上文「实现参考标注」；Rule 删除或重命名时同步更新表格。
 
 ---
 
