@@ -1,4 +1,4 @@
-import { basename, dirname, extname, join } from "node:path";
+import { basename, join } from "node:path";
 import { mkdir } from "node:fs/promises";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -10,17 +10,11 @@ setApiKey(process.env.TINIFY_API_KEY);
 
 const server = new McpServer({
   name: "tinymcp",
-  version: "2.1.0",
+  version: "2.1.1",
 });
 
 function kb(n) {
   return (n / 1024).toFixed(1) + "KB";
-}
-
-function defaultOutput(input) {
-  const ext = extname(input);
-  const base = basename(input, ext);
-  return join(dirname(input), `${base}-compressed${ext}`);
 }
 
 function formatResult(r) {
@@ -48,16 +42,14 @@ server.registerTool(
       outputPath: z
         .string()
         .optional()
-        .describe(
-          "输出路径（可选）。省略则在同目录生成 xxx-compressed.png"
-        ),
+        .describe("输出路径（可选）。省略则覆盖原文件"),
       width: z.number().optional().describe("目标宽度（像素，可选）"),
       height: z.number().optional().describe("目标高度（像素，可选）"),
     },
   },
   async ({ inputPath, outputPath, width, height }) => {
     try {
-      const output = outputPath || defaultOutput(inputPath);
+      const output = outputPath || inputPath;
       const r = await compressFile(inputPath, { output, width, height });
       return { content: [{ type: "text", text: formatResult(r) }] };
     } catch (e) {
@@ -81,7 +73,7 @@ server.registerTool(
       outputDir: z
         .string()
         .optional()
-        .describe("输出目录（可选）。省略则每张图在同目录生成 -compressed 副本"),
+        .describe("输出目录（可选）。省略则覆盖各原文件"),
       width: z.number().optional().describe("目标宽度（像素，可选）"),
       height: z.number().optional().describe("目标高度（像素，可选）"),
     },
@@ -101,9 +93,7 @@ server.registerTool(
       let totalSaved = 0;
       let lastCount = 0;
       for (const f of files) {
-        const output = outputDir
-          ? join(outputDir, basename(f))
-          : defaultOutput(f);
+        const output = outputDir ? join(outputDir, basename(f)) : f;
         const r = await compressFile(f, { output, width, height });
         totalSaved += r.saved;
         lastCount = r.compressionCount;

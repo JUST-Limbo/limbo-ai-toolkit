@@ -60,16 +60,16 @@ mcp/         可复用 MCP Server（每个一子目录：package.json + README�
 
 ### 取用方式
 
-1. 复制 `mcp/<name>/` 目录（含 `dist/`）到目标仓库，或 clone 本仓库
-2. 在目标项目 `.cursor/mcp.json` 中配置 `command` / `args` / `env`（详见各 MCP 的 README）
-3. 重启 Cursor 或刷新 MCP
+1. 从 `mcp/tinymcp/dist/` 复制 `tinymcp.cjs` 到目标项目 **`.cursor/tinymcp/`**（或 `.claude/tinymcp/`）
+2. 在 `.cursor/mcp.json` 配置 `args: [".cursor/tinymcp/tinymcp.cjs"]` 与 `TINIFY_API_KEY`
+3. 重启 Cursor
 
-**使用者无需 `npm install`**（已提交 esbuild 单文件 `dist/`）；修改源码的开发者需在对应子目录 `npm install && npm run build`。
+无需 `npm install`，不必复制源码。本仓维护者开发与构建见 `mcp/tinymcp/`。
 
 ### `tinymcp`
 
 - 路径：[`mcp/tinymcp/`](mcp/tinymcp/README.md)
-- 版本：**2.1.0**
+- 版本：**2.1.1**
 - 功能：通过 [TinyPNG 官方 API](https://tinypng.com/developers) 压缩 PNG/JPG/WebP/AVIF。MCP Tools：`compress_local_image`、`compress_images_glob`；CLI 命令 `tinymcp`。须配置 **`TINIFY_API_KEY`**（多个 Key 用 `,` 或 `;` 分隔）。免费约 500 次/月/Key。
 - 详细说明：[`mcp/tinymcp/README.md`](mcp/tinymcp/README.md)
 - 免责声明：[`mcp/tinymcp/DISCLAIMER.md`](mcp/tinymcp/DISCLAIMER.md)
@@ -85,7 +85,7 @@ mcp/         可复用 MCP Server（每个一子目录：package.json + README�
 
 ```powershell
 $env:TINIFY_API_KEY = "你的KEY"
-node mcp/tinymcp/dist/tinymcp-cli.cjs "assets/**/*.png" -o dist -w 800
+node .cursor/tinymcp/tinymcp-cli.cjs "assets/**/*.png" -o dist -w 800
 ```
 
 ## Rules

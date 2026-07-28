@@ -1,6 +1,6 @@
 {
   "name": "@limbo/tinymcp",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "TinyPNG 官方 API 图片压缩 MCP + CLI（tinymcp）",
   "type": "module",
   "bin": {

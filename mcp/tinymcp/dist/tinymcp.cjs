@@ -32690,15 +32690,10 @@ async function compressFile(input, opts = {}) {
 setApiKey(process.env.TINIFY_API_KEY);
 var server = new McpServer({
   name: "tinymcp",
-  version: "2.1.0"
+  version: "2.1.1"
 });
 function kb(n) {
   return (n / 1024).toFixed(1) + "KB";
-}
-function defaultOutput(input) {
-  const ext = (0, import_node_path2.extname)(input);
-  const base = (0, import_node_path2.basename)(input, ext);
-  return (0, import_node_path2.join)((0, import_node_path2.dirname)(input), `${base}-compressed${ext}`);
 }
 function formatResult(r) {
   let text = `\u538B\u7F29\u5B8C\u6210
@@ -32719,16 +32714,14 @@ server.registerTool(
     description: "\u7528 TinyPNG \u5B98\u65B9 API \u538B\u7F29\u672C\u5730 PNG/JPG/WebP/AVIF\u3002\u9700 TINIFY_API_KEY\uFF08\u591A\u4E2A Key \u7528 , \u6216 ; \u5206\u9694\uFF09\u3002",
     inputSchema: {
       inputPath: string2().describe("\u8F93\u5165\u56FE\u7247\u7684\u7EDD\u5BF9\u8DEF\u5F84\uFF0C\u5982 C:/Users/xxx/Desktop/a.png"),
-      outputPath: string2().optional().describe(
-        "\u8F93\u51FA\u8DEF\u5F84\uFF08\u53EF\u9009\uFF09\u3002\u7701\u7565\u5219\u5728\u540C\u76EE\u5F55\u751F\u6210 xxx-compressed.png"
-      ),
+      outputPath: string2().optional().describe("\u8F93\u51FA\u8DEF\u5F84\uFF08\u53EF\u9009\uFF09\u3002\u7701\u7565\u5219\u8986\u76D6\u539F\u6587\u4EF6"),
       width: number2().optional().describe("\u76EE\u6807\u5BBD\u5EA6\uFF08\u50CF\u7D20\uFF0C\u53EF\u9009\uFF09"),
       height: number2().optional().describe("\u76EE\u6807\u9AD8\u5EA6\uFF08\u50CF\u7D20\uFF0C\u53EF\u9009\uFF09")
     }
   },
   async ({ inputPath, outputPath, width, height }) => {
     try {
-      const output = outputPath || defaultOutput(inputPath);
+      const output = outputPath || inputPath;
       const r = await compressFile(inputPath, { output, width, height });
       return { content: [{ type: "text", text: formatResult(r) }] };
     } catch (e) {
@@ -32745,7 +32738,7 @@ server.registerTool(
     description: "\u7528 TinyPNG \u5B98\u65B9 API \u6309 glob \u6279\u91CF\u538B\u7F29\u3002\u9700 TINIFY_API_KEY\uFF08\u591A\u4E2A Key \u7528 , \u6216 ; \u5206\u9694\uFF09\u3002",
     inputSchema: {
       patterns: array(string2()).describe("glob \u6A21\u5F0F\u6570\u7EC4\uFF0C\u8DEF\u5F84\u5EFA\u8BAE\u7528\u6B63\u659C\u6760"),
-      outputDir: string2().optional().describe("\u8F93\u51FA\u76EE\u5F55\uFF08\u53EF\u9009\uFF09\u3002\u7701\u7565\u5219\u6BCF\u5F20\u56FE\u5728\u540C\u76EE\u5F55\u751F\u6210 -compressed \u526F\u672C"),
+      outputDir: string2().optional().describe("\u8F93\u51FA\u76EE\u5F55\uFF08\u53EF\u9009\uFF09\u3002\u7701\u7565\u5219\u8986\u76D6\u5404\u539F\u6587\u4EF6"),
       width: number2().optional().describe("\u76EE\u6807\u5BBD\u5EA6\uFF08\u50CF\u7D20\uFF0C\u53EF\u9009\uFF09"),
       height: number2().optional().describe("\u76EE\u6807\u9AD8\u5EA6\uFF08\u50CF\u7D20\uFF0C\u53EF\u9009\uFF09")
     }
@@ -32764,7 +32757,7 @@ server.registerTool(
       let totalSaved = 0;
       let lastCount = 0;
       for (const f of files) {
-        const output = outputDir ? (0, import_node_path2.join)(outputDir, (0, import_node_path2.basename)(f)) : defaultOutput(f);
+        const output = outputDir ? (0, import_node_path2.join)(outputDir, (0, import_node_path2.basename)(f)) : f;
         const r = await compressFile(f, { output, width, height });
         totalSaved += r.saved;
         lastCount = r.compressionCount;
