@@ -16,7 +16,28 @@
 
 | 名称 | 说明 |
 |------|------|
-| tinymcp | 图片压缩（TinyPNG **官方 API**，支持多 Key） |
+| tinymcp | 图片压缩/转格式（TinyPNG **官方 API**，须 Key） |
+| tinynokeymcp | 免 Key 压缩 PNG/JPG（官网 **Web 后台**，非官方 API；见 DISCLAIMER） |
+
+---
+
+## tinynokeymcp
+
+### 功能说明
+
+模拟 [yongplus/tinypng](https://github.com/yongplus/tinypng) Web 模式：POST `tinypng.com/backend/opt/shrink` + 随机 `X-Forwarded-For`，**无需** `TINIFY_API_KEY`。
+
+- **MCP Tools**：`compress_local_image`、`compress_images_glob`
+- **CLI**：`dist/tinynokeymcp-cli.cjs`
+- **限制**：仅 PNG/JPG，单文件约 ≤5MB；**不适合生产**
+
+详细说明与风险见 [`tinynokeymcp/README.md`](tinynokeymcp/README.md)、[`tinynokeymcp/DISCLAIMER.md`](tinynokeymcp/DISCLAIMER.md)。
+
+### 使用方法（其它项目）
+
+1. 从 `mcp/tinynokeymcp/dist/` 复制 `tinynokeymcp.cjs` 到 **`.cursor/tinynokeymcp/`**
+2. 在 `.cursor/mcp.json` 增加 `tinynokeymcp` 条目（无需 env Key）
+3. 重启 Cursor
 
 ---
 
@@ -80,7 +101,8 @@
 
 | 版本 | 说明 |
 |------|------|
-| 2.2.0 | 格式转换（avif/webp/jpg/png/jxl）；MCP convert_* Tools；CLI `-f` / `-F` |
+| 1.0.0 | 新增 tinynokeymcp：免 Key Web 后台压缩 |
+| 2.2.0 | tinymcp 格式转换（avif/webp/jpg/png/jxl）；MCP convert_* Tools；CLI `-f` / `-F` |
 | 2.1.1 | MCP 默认覆盖原图；取用统一为 `.cursor/tinymcp/` |
 | 2.1.0 | 支持多 `TINIFY_API_KEY`（`,` / `;` 分隔），轮询与失败切换 |
 | 2.0.0 | 官方 API；目录与产物更名为 **tinymcp** |

@@ -1,0 +1,47 @@
+{
+  "name": "@limbo/tinynokeymcp",
+  "version": "1.0.0",
+  "description": "TinyPNG 官网 Web 后台免 Key 图片压缩 MCP + CLI（非官方 API）",
+  "type": "module",
+  "bin": {
+    "tinynokeymcp": "dist/tinynokeymcp-cli.cjs",
+    "tinynokeymcp-server": "dist/tinynokeymcp.cjs"
+  },
+  "main": "src/core.js",
+  "exports": "./src/core.js",
+  "files": [
+    "dist",
+    "src",
+    "bin",
+    "README.md",
+    "DISCLAIMER.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "start": "node dist/tinynokeymcp-cli.cjs",
+    "mcp": "node dist/tinynokeymcp.cjs",
+    "dev:mcp": "node src/mcp.js",
+    "dev:cli": "node bin/cli.js"
+  },
+  "keywords": [
+    "tinynokeymcp",
+    "tinypng",
+    "mcp",
+    "image",
+    "compress",
+    "no-key"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "commander": "^12.1.0",
+    "fast-glob": "^3.3.2",
+    "zod": "^4.4.3"
+  }
+}
