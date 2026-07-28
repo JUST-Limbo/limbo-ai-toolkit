@@ -63,7 +63,7 @@ x-source-path: skills/some-skill
 x-source-version: 2.1.0
 ```
 
-根 `README.md` 的对外资产清单中，每条也应**简要注明来源**（至少 `owner/repo`）。
+根 `README.md` 的对外资产清单中，**仅当**资产参考或迁自**其他仓库**时注明来源（如上游 `owner/repo`、或实现逻辑出处）；**本仓库原创**条目无需写「来自本仓库」。
 
 ### 新增一个 Skill
 
@@ -71,7 +71,7 @@ x-source-version: 2.1.0
 2. 填写 `SKILL.md`：
    - YAML 头：`name`、英文 `description`（便于工具检索）、`x-skill-version`（语义化版本，从 `1.0.0` 起）、**`x-source-repo`**（及按需的 `x-source-path`、`x-source-version`，见上文「来源仓库标注」）。
    - 正文必须含**中文的「功能说明」与「使用方法」**，英文 description 不能替代中文说明。
-3. 在根 `README.md` 的「对外 Skills」清单中按现有风格补一条（功能 + use example）。
+3. 在根 `README.md` 的「对外 Skills」清单中按现有风格补一条（功能 + use example）；参考其他仓库时补充来源说明。
 
 Skill 的版本治理、改码注释、旧版本痕迹处理等细则见下文「Skill：创建、维护与调用」。
 
@@ -192,7 +192,7 @@ x-source-path: skills/某个-skill
 
 ### 6. README 同步维护
 
-- 仓库根目录的 `README.md` 用于简短说明每个 Skill 的**功能**与**use example**。
+- 仓库根目录的 `README.md` 用于简短说明每个 Skill 的**功能**与**use example**；仅当参考其他仓库资产时补充**来源**说明。
 - 后续每当新增 Skill（新增一个可用的 `SKILL.md` 主目录）时，Agent **必须**按 README 现有风格自动补充对应条目。
 - 若 Skill 被删除或重命名，README 中对应条目也应同步更新，避免文档与仓库现状不一致。
 
@@ -291,7 +291,7 @@ scope: global
 ### 6. README 同步维护
 
 - **`rules/README.md`**：每条对外 Rule 须有清单条目，以及功能说明、Version Notes；新增 / 删除 / 重命名 Rule 时同步更新。
-- **根目录 `README.md`**：维护「Rules → 取用方式」；每条 Rule 补简要说明（功能 + use example + 指向 `rules/README.md` 详情）；Rule 删除或重命名时同步更新。
+- **根目录 `README.md`**：维护「Rules → 取用方式」；每条 Rule 补简要说明（功能 + use example + 指向 `rules/README.md` 详情）；参考其他仓库时补充来源说明；Rule 删除或重命名时同步更新。
 
 ---
 

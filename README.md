@@ -14,7 +14,7 @@ rules/       可复用 Rule（编码规约、流程约束等）
 ### `generate-color-palette`
 
 - 路径：[`skills/generate-color-palette/`](skills/generate-color-palette/SKILL.md)
-- 来源：`JUST-Limbo/limbo-ai-toolkit`（本仓库原创；逻辑源自 StockBuddy `frontend/scripts/generate-color-palette.mjs`）
+- 来源：逻辑源自 StockBuddy 项目 `frontend/scripts/generate-color-palette.mjs`
 - 功能：扫描前端源码中的 hex / rgb / oklch 颜色值，去重后按色谱分组，生成交互式 HTML 色板（搜索、Tab 筛选、点击复制）。
 - Use example：
 
@@ -29,7 +29,6 @@ rules/       可复用 Rule（编码规约、流程约束等）
 ### `generate-style-catalog`
 
 - 路径：[`skills/generate-style-catalog/`](skills/generate-style-catalog/SKILL.md)
-- 来源：`JUST-Limbo/limbo-ai-toolkit`（本仓库原创）
 - 功能：扫描 Vue 功能模块目录，从 SFC `<style>` 块提取 CSS 规则，按组件分组，生成交互式 HTML 样式目录（属性分类 Tab、搜索、覆盖复制 / 追加汇总）。
 - Use example：
 
@@ -44,7 +43,6 @@ rules/       可复用 Rule（编码规约、流程约束等）
 ### `git-branch-merge-flow`
 
 - 路径：[`skills/git-branch-merge-flow/`](skills/git-branch-merge-flow/SKILL.md)
-- 来源：`JUST-Limbo/limbo-ai-toolkit`（本仓库原创）
 - 功能：将当前分支的改动按固定流程同步到目标分支。先校验来源≠目标；在 **CurrentBranch** 上：`fetch` → 必要时提交 → 若落后则对齐 `origin/<当前>` → `push`；在 **TargetBranch** 上：checkout → `fetch` → 对齐 `origin/<目标>`（若需要）→ 以 `origin/<当前>` 为来源合并 → 推送目标分支；若无冲突则切回之前的分支，冲突则停在当前阶段所在分支等待处理。
 - Use example：
 
@@ -93,7 +91,6 @@ alwaysApply: true
 ### `agent-global-baseline`
 
 - 路径：[`rules/agent-global-baseline.md`](rules/agent-global-baseline.md)
-- 来源：`JUST-Limbo/limbo-ai-toolkit`（本仓库原创）
 - 作用域：**全局**（始终加载，不绑定文件 glob）
 - 功能：跨项目 Agent 全局基线（简体中文、代码原则、目录预检查、Git 临时 proxy 等）。详细说明见 [rules/README.md](rules/README.md#agent-global-baseline)。
 - Use example：
@@ -109,7 +106,6 @@ alwaysApply: true
 ### `style-reference-clarify`
 
 - 路径：[`rules/style-reference-clarify.md`](rules/style-reference-clarify.md)
-- 来源：`JUST-Limbo/limbo-ai-toolkit`（本仓库原创）
 - 作用域：**全局**（始终加载，不绑定文件 glob）
 - 功能：用户要求参考某处样式实现另一处时，先读参考源、再一轮多选确认必抄样式点，随即改目标代码；选了必抄，没选不代表不抄。五类高权重分组（字体/背景/边框/布局/形式）仅为出题参考，问哪几组由参考实现决定。详细说明见 [rules/README.md](rules/README.md#style-reference-clarify)。
 - Use example：
