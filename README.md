@@ -14,7 +14,6 @@ rules/       可复用 Rule（编码规约、流程约束等）
 ### `generate-color-palette`
 
 - 路径：[`skills/generate-color-palette/`](skills/generate-color-palette/SKILL.md)
-- 来源：逻辑源自 StockBuddy 项目 `frontend/scripts/generate-color-palette.mjs`
 - 功能：扫描前端源码中的 hex / rgb / oklch 颜色值，去重后按色谱分组，生成交互式 HTML 色板（搜索、Tab 筛选、点击复制）。
 - Use example：
 

@@ -13,7 +13,6 @@
 
 ### `agent-global-baseline`
 
-- 来源：`JUST-Limbo/limbo-ai-toolkit`
 - 版本：见文件内 `x-rule-version` 与文末来源注释
 - 作用域：**全局**（始终加载，不绑定文件 glob）
 
@@ -59,7 +58,6 @@
 
 ### `style-reference-clarify`
 
-- 来源：`JUST-Limbo/limbo-ai-toolkit`
 - 版本：见文件内 `x-rule-version` 与文末来源注释
 - 作用域：**全局**（始终加载，不绑定文件 glob）
 

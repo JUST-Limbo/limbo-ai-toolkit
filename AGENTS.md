@@ -63,15 +63,26 @@ x-source-path: skills/some-skill
 x-source-version: 2.1.0
 ```
 
-根 `README.md` 的对外资产清单中，**仅当**资产参考或迁自**其他仓库**时注明来源（如上游 `owner/repo`、或实现逻辑出处）；**本仓库原创**条目无需写「来自本仓库」。
+### 实现参考标注（README / 正文）
+
+与上文 `x-source-repo`（本仓库资产治理、上游同步对照）不同，指在 **README 清单**或 **Skill / Rule 正文**中向读者说明「逻辑 / 实现迁自何处」的可见描述。
+
+**填写规则**：
+
+- **仅当参考对象为公开开源项目**时方可标注（如上游 `owner/repo`、开源库名、公开文档链接）。
+- **禁止标注私有项目、内部仓库、未公开代码路径或客户项目**，以免泄密。
+- **本仓库原创**，或实现参考来自私有项目但对外分发时：**不写**来源 / 实现参考行。
+- 与 `x-source-repo` 无关：后者仍按上文对本仓库或**公开**上游仓库填写，不因本条规定省略。
+
+根 `README.md` 的对外资产清单与 Skill / Rule 正文中的来源、实现参考说明，均遵守本节；本仓库原创或参考私有实现时不写。
 
 ### 新增一个 Skill
 
 1. 在 `skills/<your-skill-name>/` 下新建 `SKILL.md`（可参照现有 skill 的结构）。
 2. 填写 `SKILL.md`：
    - YAML 头：`name`、英文 `description`（便于工具检索）、`x-skill-version`（语义化版本，从 `1.0.0` 起）、**`x-source-repo`**（及按需的 `x-source-path`、`x-source-version`，见上文「来源仓库标注」）。
-   - 正文必须含**中文的「功能说明」与「使用方法」**，英文 description 不能替代中文说明。
-3. 在根 `README.md` 的「对外 Skills」清单中按现有风格补一条（功能 + use example）；参考其他仓库时补充来源说明。
+   - 正文必须含**中文的「功能说明」与「使用方法」**，英文 description 不能替代中文说明；功能说明中如需写实现参考，遵守上文「实现参考标注」。
+3. 在根 `README.md` 的「对外 Skills」清单中按现有风格补一条（功能 + use example）；仅当参考**公开开源**项目时补充来源或实现参考说明。
 
 Skill 的版本治理、改码注释、旧版本痕迹处理等细则见下文「Skill：创建、维护与调用」。
 
@@ -192,7 +203,7 @@ x-source-path: skills/某个-skill
 
 ### 6. README 同步维护
 
-- 仓库根目录的 `README.md` 用于简短说明每个 Skill 的**功能**与**use example**；仅当参考其他仓库资产时补充**来源**说明。
+- 仓库根目录的 `README.md` 用于简短说明每个 Skill 的**功能**与**use example**；来源 / 实现参考见上文「实现参考标注」。
 - 后续每当新增 Skill（新增一个可用的 `SKILL.md` 主目录）时，Agent **必须**按 README 现有风格自动补充对应条目。
 - 若 Skill 被删除或重命名，README 中对应条目也应同步更新，避免文档与仓库现状不一致。
 
@@ -214,7 +225,7 @@ x-source-path: skills/某个-skill
 
 - 在规则清单表补一行（文件、作用域、简要说明）。
 - 在该 Rule 条目下写**中文**说明，至少包含：
-  - **功能说明**：该 Rule 解决什么问题、适用场景、不负责的范围（如有）。
+  - **功能说明**：该 Rule 解决什么问题、适用场景、不负责的范围（如有）；如需写实现参考，遵守 [AGENTS.md §实现参考标注](../AGENTS.md#实现参考标注readme--正文)。
   - **使用方法**：链到根 [README.md](README.md#取用方式) 的通用取用方式；若该 Rule 有特有用法（非通用路径/frontmatter），在此补充。
   - **Version Notes**：各已发布版本的变更摘要。
 
@@ -291,7 +302,7 @@ scope: global
 ### 6. README 同步维护
 
 - **`rules/README.md`**：每条对外 Rule 须有清单条目，以及功能说明、Version Notes；新增 / 删除 / 重命名 Rule 时同步更新。
-- **根目录 `README.md`**：维护「Rules → 取用方式」；每条 Rule 补简要说明（功能 + use example + 指向 `rules/README.md` 详情）；参考其他仓库时补充来源说明；Rule 删除或重命名时同步更新。
+- **根目录 `README.md`**：维护「Rules → 取用方式」；每条 Rule 补简要说明（功能 + use example + 指向 `rules/README.md` 详情）；来源 / 实现参考见上文「实现参考标注」；Rule 删除或重命名时同步更新。
 
 ---
 

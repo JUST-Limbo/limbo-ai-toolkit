@@ -28,8 +28,6 @@ x-source-path: skills/generate-color-palette
 - 解析 CSS 变量名（只提取字面量色值）
 - 扫描非前端目录（需通过 `--scan` 指定）
 
-**实现来源**：逻辑源自 StockBuddy 项目的 `frontend/scripts/generate-color-palette.mjs`，已参数化以便跨项目复用。
-
 ## 使用方法
 
 ### 1. 运行脚本（优先：直接引用，无需复制）
