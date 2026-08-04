@@ -54,6 +54,7 @@ alwaysApply: true
 
 - 全局简体中文交流、代码引用带行号
 - Vue/React 页面层 API 用 async/await；新代码禁用 `?.` / `!` / `??`
+- 创建或调整 DOM 结构时检查节点职责变化，避免新增或遗留冗余层级
 - 动作链（提交、推送、批量改动等）前做目录规则预检查
 - Git 远程失败时说明原因、提示开代理，仅用**临时 proxy** 重试
 
@@ -67,6 +68,10 @@ alwaysApply: true
 规则正文：[`agent-global-baseline.md`](agent-global-baseline.md)。复制、frontmatter 调整、对照上游更新见上文 [取用方式](#取用方式)。
 
 #### Version Notes
+
+**1.3.0**
+
+- 新增 DOM 结构约束：检查改动前后节点职责变化，在不影响现有行为且不扩大范围的前提下移除本次改动涉及的冗余节点。
 
 **1.2.1**
 
