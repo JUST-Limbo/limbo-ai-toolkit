@@ -5,10 +5,13 @@
 ## 目录一览
 
 ```
-skills/      可复用 Skill（每个一目录：SKILL.md 最新版 + versions/ 历史快照）
-rules/       可复用 Rule（编码规约、流程约束等）
+skills/      可复用 Skill（每个一目录，仅放当前版本及其运行依赖）
+rules/       可复用 Rule（编码规约、流程约束等当前版本）
 mcp/         可复用 MCP Server（每个一子目录：package.json + README）
+history/     已发布资产的历史快照（维护与审计使用，不向使用侧分发）
 ```
+
+使用侧获取资产时采用白名单：Skill 只复制 `SKILL.md` 及其明确需要的 `scripts/`、`assets/`、`references/`，Rule 只复制指定的 `rules/<name>.md`，MCP 按各自 README 只复制指定构建产物；不要复制 `history/`。
 
 ## 对外资产清单
 
