@@ -44,7 +44,7 @@ history/     已发布资产的历史快照（维护与审计使用，不向使�
 |------|------|
 | [`generate-color-palette`](skills/generate-color-palette/SKILL.md) | 扫描前端源码中的 hex / rgb / oklch 颜色值，去重后按色谱分组，生成交互式 HTML 色板（搜索、Tab 筛选、点击复制） |
 | [`git-branch-merge-flow`](skills/git-branch-merge-flow/SKILL.md) | 将当前分支按固定流程同步到目标分支：`fetch` → 对齐 `origin/*` → `push` → checkout 目标 → merge `origin/<当前>` → 推送；冲突时停在当前阶段分支 |
-| [`long-task-state`](skills/long-task-state/SKILL.md) | 评估长时间、多阶段任务是否需要持久状态，征得用户同意后维护精简、可验证的工作状态，支持恢复、接管与收尾 |
+| [`long-task-state`](skills/long-task-state/SKILL.md) | 评估长时间、多阶段任务是否需要持久状态，征得用户同意后维护精简、可验证的工作状态，并可按需配置新对话自动发现探针，支持恢复、接管与收尾 |
 | [`picture-formats`](skills/picture-formats/SKILL.md) | 同源并行导出 AVIF/WebP/JPEG（或 PNG），用 `<picture>` 让浏览器只下载一种；含 Vue 实践、透明兜底、Network 排错与 tinypng-mcp 素材准备 |
 
 ### Rules

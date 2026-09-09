@@ -47,21 +47,25 @@
 
 - **本仓库原创**：`x-source-repo` 填本仓库（当前为 `JUST-Limbo/limbo-ai-toolkit`）；`x-source-path` 填该资产在本仓库中的路径。
 - **从其它仓库迁入或 fork**：`x-source-repo` 填**上游**仓库；`x-source-path` 填上游中的对应路径；同步后更新 `x-source-version`。
-- Skill 写在 `SKILL.md` YAML 头；Rule / MCP / Agent / 命令等写在文件 frontmatter，或无 frontmatter 时在正文开头用等价 YAML 块标注。
+- Skill 的自定义治理字段写在 `SKILL.md` YAML 头的 `metadata` 下，避免使用官方校验器不接受的顶层扩展字段；Rule / MCP / Agent / 命令等写在文件 frontmatter，或无 frontmatter 时在正文开头用等价 YAML 块标注。
 
 示例（本仓库原创 Skill）：
 
 ```yaml
-x-source-repo: JUST-Limbo/limbo-ai-toolkit
-x-source-path: skills/git-branch-merge-flow
+metadata:
+  x-skill-version: "1.0.0"
+  x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
+  x-source-path: "skills/git-branch-merge-flow"
 ```
 
 示例（从外仓同步）：
 
 ```yaml
-x-source-repo: org/upstream-toolkit
-x-source-path: skills/some-skill
-x-source-version: 2.1.0
+metadata:
+  x-skill-version: "1.0.0"
+  x-source-repo: "org/upstream-toolkit"
+  x-source-path: "skills/some-skill"
+  x-source-version: "2.1.0"
 ```
 
 ### 实现参考标注（README / 正文）
@@ -81,7 +85,7 @@ x-source-version: 2.1.0
 
 1. 在 `skills/<your-skill-name>/` 下新建 `SKILL.md`（可参照现有 skill 的结构）。
 2. 填写 `SKILL.md`：
-   - YAML 头：`name`、英文 `description`（便于工具检索）、`x-skill-version`（语义化版本，从 `1.0.0` 起）、**`x-source-repo`**（及按需的 `x-source-path`、`x-source-version`，见上文「来源仓库标注」）。
+   - YAML 头顶层：`name`、英文 `description`（便于工具检索）；自定义治理字段放在 `metadata` 下，包括 `x-skill-version`（语义化版本，从 `1.0.0` 起）、**`x-source-repo`**（及按需的 `x-source-path`、`x-source-version`，见上文「来源仓库标注」）。不得把这些 `x-*` 字段放在 YAML 顶层。
    - 正文必须含**中文的「功能说明」与「使用方法」**，英文 description 不能替代中文说明；功能说明中如需写实现参考，遵守上文「实现参考标注」。
 3. 在根 `README.md`「对外资产清单 → Skills」表格中补一行（名称、说明）；仅当参考**公开开源**项目时在说明列补充来源或实现参考。
 
@@ -174,15 +178,18 @@ Skill 的版本治理、改码注释、旧版本痕迹处理等细则见下文�
 - `skills/某个-skill/`：除 `SKILL.md` 外，只放当前版本明确需要的 `scripts/`、`assets/`、`references/` 等运行依赖，**不得**放历史快照。
 - `history/skills/某个-skill/<版本号>.md`：该版本的**完整快照**；发布新版本时**新增**文件，**不要**覆盖旧版本快照。历史文件不得命名为 `SKILL.md`，避免被 Skill 安装器递归识别。
 
-在 `SKILL.md` 的 YAML 头中增加版本字段 `x-skill-version`，例如：
+在 `SKILL.md` 的 YAML 头中，把版本与来源字段放进官方校验器允许的 `metadata` 容器，例如：
 
 ```yaml
-x-skill-version: 1.0.0
-x-source-repo: JUST-Limbo/limbo-ai-toolkit
-x-source-path: skills/某个-skill
+name: 某个-skill
+description: Explain when this skill should be used.
+metadata:
+  x-skill-version: "1.0.0"
+  x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
+  x-source-path: "skills/某个-skill"
 ```
 
-> 用 `x-` 前缀表明这是本仓库自定义的扩展字段：它不属于 SKILL.md 官方 frontmatter，工具不会解析它，也不会与官方字段冲突。版本号、来源仓库等仅供本仓库治理与对照使用。
+> `metadata` 是 SKILL.md 支持的顶层扩展容器；其内部的 `x-*` 字段仍是本仓库自定义语义，Codex 不会据此执行版本管理。版本号、来源仓库等仅供本仓库治理与对照使用；Skill 的顶层字段应限制为官方校验器允许的字段。
 
 ### 3. 会改动代码的 Skill：版本注释
 
