@@ -46,6 +46,7 @@ history/     已发布资产的历史快照（维护与审计使用，不向使�
 | [`git-branch-merge-flow`](skills/git-branch-merge-flow/SKILL.md) | 将当前分支按固定流程同步到目标分支：`fetch` → 对齐 `origin/*` → `push` → checkout 目标 → merge `origin/<当前>` → 推送；冲突时停在当前阶段分支 |
 | [`long-task-state`](skills/long-task-state/SKILL.md) | 评估长时间、多阶段任务是否需要持久状态，征得用户同意后维护可验证的里程碑计划、进度与路线调整，并支持有界子 Agent 委派、跨会话恢复、接管和自动发现探针 |
 | [`picture-formats`](skills/picture-formats/SKILL.md) | 同源并行导出 AVIF/WebP/JPEG（或 PNG），用 `<picture>` 让浏览器只下载一种；含 Vue 实践、透明兜底、Network 排错与 tinypng-mcp 素材准备 |
+| [`programming-study-coach`](skills/programming-study-coach/SKILL.md) | 调研有信誉的公开课程后规划并教授 Java 等编程语言，维护相互印证的教学大纲、含完整答案与验证状态的练习簿和面向学习者的知识手册，并以掌握证据、复习与跨会话交接持续推进 |
 
 ### Rules
 
