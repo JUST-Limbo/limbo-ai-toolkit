@@ -1,4 +1,4 @@
 interface:
   display_name: "编程学习教练"
   short_description: "调研课程并维护教学大纲、完整练习簿、知识手册与复习记录"
-  default_prompt: "使用 $programming-study-coach 为我的 Java 学习建立并执行教学大纲、练习簿和知识手册。"
+  default_prompt: "使用 $programming-study-coach 为我的编程学习建立并执行教学大纲、练习簿和知识手册。"
