@@ -1,5 +1,5 @@
 ---
-name: programming-study-coach
+name: programming-teacher
 description: >-
   Plan and teach a programming language through researched
   curricula, persisted syllabi, exercise books with document-and-file reference
@@ -10,12 +10,12 @@ description: >-
   artifacts. Do not use to complete graded work or paste exercise answers into
   teaching dialogue or knowledge manuals.
 metadata:
-  x-skill-version: "2.0.0"
+  x-skill-version: "3.0.0"
   x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
-  x-source-path: "skills/programming-study-coach"
+  x-source-path: "skills/programming-teacher"
 ---
 
-# Programming Study Coach
+# Programming Teacher
 
 ## 功能说明
 
@@ -45,7 +45,7 @@ metadata:
 用户可说明语言、目标、学习仓库和笔记位置，例如：
 
 ```text
-用 programming-study-coach 参考公开课程，为我建立编程学习大纲、练习簿和知识手册。
+用 programming-teacher 参考公开课程，为我建立编程学习大纲、练习簿和知识手册。
 ```
 
 ```text
@@ -129,7 +129,7 @@ metadata:
 - `contextLoads()` 或应用启动只证明基础上下文可加载，不证明注册、查询、权限等业务行为正确；业务目标需要对应的正向、失败或边界验证。
 - 不修改隐藏测试、课程测试或评分条件来制造通过结果。
 - 默认不直接修改学习者答案。用户要求查看完整答案时，指向练习簿中的准确练习编号、“完整答案”小节和答案代码目录，不把答案复制到对话或知识手册。用户明确要求直接修改代码时，才执行最小必要改动并遵守目标仓库规则。
-- 本 Skill 直接修改业务或脚本代码时，在改动附近添加符合语言习惯的简短注释：`programming-study-coach 2.0.0`。只修改学习文档时不添加代码注释。
+- 本 Skill 直接修改业务或脚本代码时，在改动附近添加符合语言习惯的简短注释：`programming-teacher 3.0.0`。只修改学习文档时不添加代码注释。
 
 ## 进度与掌握判断
 
@@ -157,9 +157,10 @@ metadata:
 
 ## Version Notes
 
-- Current effective version: `2.0.0`
+- Current effective version: `3.0.0`
 - Default behavior when user does not specify version: use this latest `SKILL.md`.
-- Historical snapshots are created only at a release commit under `history/skills/programming-study-coach/<version>.md`.
+- Historical snapshots for the renamed Skill are created only at a release commit under `history/skills/programming-teacher/<version>.md`; versions released before the rename remain under `history/skills/programming-study-coach/`.
+- `3.0.0`：将 Skill、目录、调用名和 UI 元数据从 `programming-study-coach` 重命名为 `programming-teacher`；旧名称不再作为当前入口，历史版本仍保留在原历史目录。
 - `2.0.0`：将练习簿重构为练习文档与 `answers/<E-*>/` 实际代码文件的组合，取消参考答案逐题独立工程、编译、运行、测试和运行验证状态要求；新增有界子智能体委派体系，由主 Agent 按任务自主选择模型与思考强度并统一教学决策和事实源写入。
 - `1.3.0`: 收紧完整答案：沿用只能指向已写全的 `E-*`；不打开工程须能对照复现该步结束状态；拆步题写本步完整文件而非仓库终态；工程或手册行为变更须同一轮回写对应练习答案。
 - `1.2.0`: 每次编辑学习文档后必须按「已维护到XX文档XX节XX小节XX点」汇报改动位置，结束一轮时汇总本轮维护点。
