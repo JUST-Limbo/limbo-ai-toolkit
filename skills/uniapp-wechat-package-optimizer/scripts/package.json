@@ -1,0 +1,10 @@
+{
+  "name": "uniapp-wechat-package-optimizer-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Internal runtime for the uniapp-wechat-package-optimizer skill",
+  "engines": { "node": ">=20" },
+  "scripts": { "test": "node --test tests/*.test.mjs" },
+  "dependencies": { "miniprogram-ci": "2.1.31" }
+}

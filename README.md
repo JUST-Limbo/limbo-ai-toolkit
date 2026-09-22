@@ -47,6 +47,7 @@ history/     已发布资产的历史快照（维护与审计使用，不向使�
 | [`long-task-state`](skills/long-task-state/SKILL.md) | 评估长时间、多阶段任务是否需要持久状态，征得用户同意后维护可验证的里程碑计划、进度与路线调整，并支持有界子 Agent 委派、跨会话恢复、接管和自动发现探针 |
 | [`picture-formats`](skills/picture-formats/SKILL.md) | 同源并行导出 AVIF/WebP/JPEG（或 PNG），用 `<picture>` 让浏览器只下载一种；含 Vue 实践、透明兜底、Network 排错与 tinypng-mcp 素材准备 |
 | [`programming-teacher`](skills/programming-teacher/SKILL.md) | 调研有信誉的公开课程后规划并教授编程语言，维护相互印证的教学大纲、由练习文档与实际答案代码文件组成的练习簿和面向学习者的知识手册；参考答案默认只做静态完整性与路径一致性检查，不要求逐题运行验证；每次改文档后按「文档→节→小节→点」汇报维护位置；可按任务边界自主选择子智能体模型与思考强度开展调研、草稿、审计和诊断，由主 Agent 统一教学决策与事实源写入 |
+| [`uniapp-wechat-package-optimizer`](skills/uniapp-wechat-package-optimizer/SKILL.md) | 面向 Vue 2 / Vue 3 uni-app CLI 工程，内置 miniprogram-ci 依赖分析、离线 HTML 包体报告、源码优化流程与前后对比；可选微信预览验证实际打包体积 |
 
 ### Rules
 

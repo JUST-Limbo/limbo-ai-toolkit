@@ -1,0 +1,1200 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>微信小程序体积分析报告</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f3f6fa;
+      --surface: #ffffff;
+      --surface-subtle: #f8fafc;
+      --text: #172033;
+      --muted: #667085;
+      --line: #dfe5ee;
+      --primary: #1769e0;
+      --primary-soft: #eaf2ff;
+      --success: #18864b;
+      --warning: #a65d00;
+      --error: #c73434;
+      --shadow: 0 12px 32px rgba(25, 42, 70, 0.07);
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    .shell { width: min(1440px, calc(100% - 40px)); margin: 0 auto; padding: 32px 0 56px; }
+    .hero { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; margin-bottom: 24px; }
+    .eyebrow { margin: 0 0 8px; color: var(--primary); font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(27px, 4vw, 40px); letter-spacing: -.03em; }
+    .hero-meta { margin: 12px 0 0; color: var(--muted); line-height: 1.7; }
+    .stage-list { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; max-width: 520px; }
+    .stage, .badge { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); padding: 7px 11px; font-size: 12px; }
+    .stage::before, .badge::before { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); content: ""; }
+    .status-ok::before, .severity-info::before { background: var(--success); }
+    .status-error::before, .severity-error::before { background: var(--error); }
+    .status-skipped::before, .severity-warning::before { background: var(--warning); }
+    .grid { display: grid; gap: 18px; }
+    .overview { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .card, .section { border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
+    .card { min-height: 132px; padding: 20px; }
+    .card-label { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
+    .card-value { margin: 0; font-size: 27px; font-weight: 750; letter-spacing: -.02em; }
+    .card-detail { margin: 8px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .section { margin-top: 18px; padding: 22px; }
+    .section-head { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; margin-bottom: 18px; }
+    .section-head.single { display: block; }
+    h2 { margin: 0; font-size: 19px; }
+    h3 { margin: 0; font-size: 15px; }
+    .section-note, .empty, .list-summary { color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .section-note { margin: 6px 0 0; }
+    .empty { margin: 0; padding: 22px; border: 1px dashed var(--line); border-radius: 12px; text-align: center; }
+    .source-panel { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+    .source-item { border-radius: 12px; background: var(--surface-subtle); padding: 14px; }
+    .source-item strong { display: block; margin-bottom: 5px; font-size: 13px; }
+    .source-item span { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+    .notes { margin: 14px 0 0; padding-left: 20px; color: var(--muted); font-size: 13px; line-height: 1.7; }
+    .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; }
+    .filter { border: 1px solid var(--line); border-radius: 999px; background: var(--surface); padding: 8px 12px; font-weight: 400; cursor: pointer; }
+    .filter:hover, .filter:focus-visible { border-color: var(--primary); }
+    .filter.active { border-color: var(--primary); background: var(--primary-soft); color: var(--primary); }
+    .package-table, .comparison-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { color: var(--muted); font-weight: 600; text-align: left; }
+    th, td { border-bottom: 1px solid var(--line); padding: 11px 10px; }
+    th:last-child, td:last-child { text-align: right; }
+    /* uniapp-wechat-package-optimizer 1.0.0: compact tree controls preserve the fixed, scroll-free file viewport. */
+    .treemap { position: relative; height: 456px; overflow: hidden; border: 1px solid var(--line); border-radius: 0; background: var(--surface-subtle); }
+    .tree-scope { display: flex; align-items: center; gap: 6px; width: 100%; height: 30px; padding: 4px 6px; border-bottom: 1px solid #acbbce; background: #edf3fc; color: #34445b; font-size: 12px; line-height: 18px; white-space: nowrap; }
+    .tree-scope-size { flex-shrink: 0; font-size: 12px; font-weight: 750; font-variant-numeric: tabular-nums; }
+    .tree-scope-count { flex-shrink: 0; }
+    .tree-canvas { position: relative; }
+    /* uniapp-wechat-package-optimizer 1.0.0: directories use transparent containers with 1px boundaries; only file blocks carry a fill color. */
+    .tree-directory { position: absolute; overflow: hidden; border: 1px solid var(--surface); border-radius: 0; box-shadow: inset 0 0 0 1px #acbbce; }
+    .tree-directory-label { display: flex; align-items: flex-start; gap: 4px; width: 100%; height: 24px; margin: 0; padding: 3px 5px; border: 0; border-radius: 0; background: transparent; color: #34445b; font-size: 11px; line-height: 18px; text-align: left; white-space: nowrap; cursor: pointer; }
+    .tree-directory-label:hover, .tree-directory-label:focus { background: transparent; outline: none; }
+    /* uniapp-wechat-package-optimizer 1.0.0: frame the directory, not its compact title; keep child hit targets intact. */
+    .tree-directory:hover:not(:has(.tree-directory:hover, .tree-node:hover))::after,
+    .tree-directory:has(> .tree-directory-label:focus)::after {
+      content: ""; position: absolute; inset: 0; border: 1px solid var(--primary); z-index: 3; pointer-events: none;
+    }
+    .tree-directory-label strong { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .tree-directory-size { flex-shrink: 0; color: #173e70; font-size: 11px; font-weight: 750; font-variant-numeric: tabular-nums; }
+    /* uniapp-wechat-package-optimizer 1.0.0: keep breadcrumb navigation in the fixed tree header without introducing a scrollbar. */
+    .tree-scope .tree-navigation { flex: 1; min-width: 0; overflow: hidden; }
+    .tree-scope .tree-breadcrumb { display: flex; align-items: center; min-width: 0; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 12px; }
+    .tree-breadcrumb li { display: flex; flex: 0 1 auto; align-items: center; gap: 6px; min-width: 0; }
+    .tree-breadcrumb a, .tree-breadcrumb [aria-current] { display: block; min-width: 0; max-width: 220px; padding: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tree-breadcrumb a { color: var(--primary); text-decoration: none; }
+    .tree-breadcrumb a:hover { text-decoration: underline; }
+    .tree-breadcrumb a:focus-visible, .tree-breadcrumb [aria-current]:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .tree-breadcrumb [aria-current] { color: var(--text); font-weight: 700; }
+    .tree-breadcrumb-separator { color: var(--muted); }
+    .tree-node { position: absolute; display: flex; align-items: flex-start; gap: 4px; padding: 3px 5px; overflow: hidden; border: .5px solid var(--surface); border-radius: 0; background: #7aa7e8; color: #16354d; text-align: left; white-space: nowrap; cursor: pointer; transition: filter .15s ease; }
+    .tree-node:hover { z-index: 2; filter: brightness(.93); outline: .5px solid var(--primary); outline-offset: -0.5px; }
+    .tree-node:focus-visible { z-index: 2; filter: brightness(.93); outline: 2px solid var(--primary); outline-offset: -2px; }
+    .tree-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 11px; font-weight: 650; line-height: 18px; }
+    .tree-size { flex-shrink: 0; font-size: 11px; line-height: 18px; font-variant-numeric: tabular-nums; }
+    .tree-size { font-weight: 400; }
+    .file-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, .8fr); gap: 18px; }
+    .search { width: min(380px, 100%); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; color: var(--text); background: var(--surface); }
+    .search:focus { border-color: var(--primary); outline: 3px solid var(--primary-soft); }
+    .file-list, .relation-list, .issue-list, .duplicate-list { margin: 0; padding: 0; list-style: none; }
+    .file-list { max-height: 620px; overflow: auto; border: 1px solid var(--line); border-radius: 12px; }
+    .file-button { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; border: 0; border-bottom: 1px solid var(--line); background: transparent; padding: 11px 12px; text-align: left; cursor: pointer; }
+    .file-list li:last-child .file-button { border-bottom: 0; }
+    .file-button:hover, .file-button:focus-visible, .file-button.selected { background: var(--primary-soft); outline: 0; }
+    .rank { color: var(--muted); font-variant-numeric: tabular-nums; }
+    .path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .size { font-weight: 700; font-variant-numeric: tabular-nums; }
+    .detail { position: sticky; top: 16px; align-self: start; min-height: 240px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-subtle); padding: 16px; }
+    .detail-path { margin: 8px 0 14px; color: var(--primary); font-size: 13px; overflow-wrap: anywhere; }
+    .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; margin-bottom: 18px; }
+    .detail-grid div { border-radius: 9px; background: var(--surface); padding: 10px; }
+    .detail-grid span { display: block; color: var(--muted); font-size: 11px; }
+    .detail-grid strong { display: block; margin-top: 5px; font-size: 13px; overflow-wrap: anywhere; }
+    .relation-group + .relation-group { margin-top: 15px; }
+    .relation-group h3 { margin-bottom: 8px; }
+    .relation-item { margin-bottom: 6px; }
+    .module-button { width: 100%; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); padding: 8px 10px; text-align: left; cursor: pointer; overflow-wrap: anywhere; }
+    .module-button:hover, .module-button:focus-visible { border-color: var(--primary); color: var(--primary); }
+    .relation-error { display: block; margin-top: 3px; color: var(--error); font-size: 11px; }
+    .two-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .issue, .duplicate { border: 1px solid var(--line); border-radius: 12px; padding: 15px; }
+    .issue + .issue, .duplicate + .duplicate { margin-top: 10px; }
+    .issue-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    .issue p, .duplicate p { margin: 8px 0 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .severity { border-radius: 999px; padding: 4px 8px; font-size: 11px; font-weight: 700; }
+    .severity-info { background: #eaf7f0; color: var(--success); }
+    .severity-warning { background: #fff3dc; color: var(--warning); }
+    .severity-error { background: #ffeded; color: var(--error); }
+    .quality-detail { margin: 10px 0 0; max-height: 180px; overflow: auto; border-radius: 8px; background: #111827; color: #dce5f5; padding: 10px; font: 12px/1.5 Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .quality-original { margin-top: 10px; font-size: 12px; color: var(--muted); }
+    .quality-original summary { cursor: pointer; }
+    .doc-link { color: var(--primary); font-size: 12px; }
+    .file-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+    .file-tag { border: 0; border-radius: 6px; background: var(--primary-soft); color: var(--primary); padding: 5px 7px; font-size: 11px; cursor: pointer; }
+    .delta-positive { color: var(--error); }
+    .delta-negative { color: var(--success); }
+    .delta-zero { color: var(--muted); }
+    .comparison-warning { border-left: 3px solid var(--warning); background: #fff9ed; padding: 10px 12px; color: #704300; font-size: 13px; }
+    .comparison-warning + .comparison-warning { margin-top: 7px; }
+    .footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: center; }
+    .hidden { display: none !important; }
+
+    @media (max-width: 980px) {
+      .overview, .source-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .file-layout, .two-columns { grid-template-columns: 1fr; }
+      .detail { position: static; }
+    }
+
+    @media (max-width: 640px) {
+      .shell { width: min(100% - 24px, 1440px); padding-top: 20px; }
+      .hero { display: block; }
+      .stage-list { justify-content: flex-start; margin-top: 16px; }
+      .overview, .source-panel { grid-template-columns: 1fr; }
+      .section { padding: 16px; }
+      .section-head { display: block; }
+      .section-head .search, .section-head .filter-bar { margin-top: 12px; }
+      .treemap { height: 396px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <section aria-labelledby="report-title">
+        <p class="eyebrow">uni-app · 微信小程序</p>
+        <h1 id="report-title">体积分析报告</h1>
+        <p class="hero-meta" id="hero-meta"></p>
+      </section>
+      <div class="stage-list" id="stage-list" aria-label="分析阶段状态"></div>
+    </header>
+
+    <section class="grid overview" id="overview" aria-label="包概览"></section>
+
+    <section class="section" aria-labelledby="source-title">
+      <header class="section-head single">
+        <h2 id="source-title">数据口径</h2>
+        <p class="section-note">文件体积与上传预览包体积属于不同口径，不应直接互相替代。</p>
+      </header>
+      <div class="source-panel" id="source-panel"></div>
+      <ul class="notes" id="measurement-notes"></ul>
+    </section>
+
+    <section class="section" aria-labelledby="package-title">
+      <div class="section-head">
+        <div>
+          <h2 id="package-title">包分布</h2>
+          <p class="section-note">筛选会同时作用于矩形树图和文件排行。</p>
+        </div>
+        <div class="filter-bar" id="package-filter" aria-label="包筛选"></div>
+      </div>
+      <div id="package-table"></div>
+    </section>
+
+    <section class="section" aria-labelledby="treemap-title">
+      <header class="section-head single">
+        <h2 id="treemap-title">文件体积矩形树图</h2>
+        <p class="section-note" id="treemap-note"></p>
+      </header>
+      <div class="treemap" id="treemap" aria-label="按 analyseCode 文件体积绘制的矩形树图"></div>
+    </section>
+
+    <section class="section" aria-labelledby="files-title">
+      <div class="section-head">
+        <div>
+          <h2 id="files-title">文件大小排行</h2>
+          <p class="section-note" id="file-summary"></p>
+        </div>
+        <input class="search" id="file-search" type="search" placeholder="搜索文件路径或模块 ID" aria-label="搜索文件">
+      </div>
+      <div class="file-layout">
+        <ol class="file-list" id="file-list"></ol>
+        <aside class="detail" id="file-detail" aria-live="polite"></aside>
+      </div>
+    </section>
+
+    <div class="grid two-columns">
+      <section class="section" aria-labelledby="finding-title">
+        <header class="section-head single">
+          <h2 id="finding-title">质量检查</h2>
+          <p class="section-note">包含分析提示与官方检查结果。未通过项需结合配置和实际引用核实，不等同于发布阻断或可直接删除的结论。</p>
+        </header>
+        <div id="quality-content"></div>
+      </section>
+
+      <section class="section" aria-labelledby="duplicate-title">
+        <header class="section-head single">
+          <h2 id="duplicate-title">重复资源</h2>
+          <p class="section-note">potentialBytes 为理论可减少体积，实际效果取决于引用与构建方式。</p>
+        </header>
+        <div id="duplicate-content"></div>
+      </section>
+    </div>
+
+    <section class="section hidden" id="comparison-section" aria-labelledby="comparison-title">
+      <header class="section-head single">
+        <h2 id="comparison-title">基准对比</h2>
+        <p class="section-note" id="comparison-note"></p>
+      </header>
+      <div id="comparison-content"></div>
+    </section>
+
+    <footer class="footer" id="footer"></footer>
+  </main>
+
+  <script id="report-data" type="application/json">__REPORT_DATA__</script>
+  <script>
+    // Generated by Skill uniapp-wechat-package-optimizer 1.0.0.
+    (function () {
+      "use strict";
+
+      var MAX_FILE_ROWS = 200;
+      var MAX_RELATIONS = 100;
+      var selectedPackage = "*";
+      var selectedTreePath = "";
+      var selectedFilePath = "";
+      var report = parseReport();
+      var files = arrayValue(report.files);
+      var packages = arrayValue(report.packages);
+      var modules = arrayValue(report.modules);
+      var moduleById = new Map();
+      var moduleByPath = new Map();
+
+      modules.forEach(function (module) {
+        var id = stringValue(module && module.id, "");
+        var path = stringValue(module && module.path, "");
+        if (id) moduleById.set(id, module);
+        if (path && !moduleByPath.has(path)) moduleByPath.set(path, module);
+      });
+
+      renderHeader();
+      renderOverview();
+      renderSources();
+      renderPackageFilter();
+      renderPackageTable();
+      renderTreemap();
+      renderFileList();
+      renderQuality();
+      renderDuplicates();
+      renderComparison();
+      renderFooter();
+
+      window.addEventListener("resize", debounce(renderTreemap, 120));
+      document.getElementById("file-search").addEventListener("input", renderFileList);
+
+      function parseReport() {
+        var node = document.getElementById("report-data");
+        try {
+          var parsed = JSON.parse(node.textContent || "{}");
+          return parsed && typeof parsed === "object" ? parsed : {};
+        } catch (error) {
+          return { stages: { analysis: { status: "error", message: "报告数据无法解析" } } };
+        }
+      }
+
+      function arrayValue(value) {
+        return Array.isArray(value) ? value : [];
+      }
+
+      function objectValue(value) {
+        return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+      }
+
+      function stringValue(value, fallback) {
+        return typeof value === "string" && value ? value : fallback;
+      }
+
+      function finiteNumber(value, fallback) {
+        return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+      }
+
+      function byteText(value) {
+        if (typeof value !== "number" || !Number.isFinite(value)) return "未验证";
+        var absolute = Math.abs(value);
+        // uniapp-wechat-package-optimizer 1.0.0: report display uses decimal byte units, matching KB/MB/GB labels.
+        if (absolute < 1000) return formatNumber(value) + " B";
+        if (absolute < 1000 * 1000) return formatDecimal(value / 1000) + " KB";
+        if (absolute < 1000 * 1000 * 1000) return formatDecimal(value / 1000 / 1000) + " MB";
+        return formatDecimal(value / 1000 / 1000 / 1000) + " GB";
+      }
+
+      function formatNumber(value) {
+        return new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 0 }).format(value);
+      }
+
+      function formatDecimal(value) {
+        return new Intl.NumberFormat("zh-CN", { minimumFractionDigits: 1, maximumFractionDigits: 2 }).format(value);
+      }
+
+      function dateText(value) {
+        if (typeof value !== "string" || !value) return "生成时间未知";
+        var timestamp = Date.parse(value);
+        if (!Number.isFinite(timestamp)) return value;
+        return new Intl.DateTimeFormat("zh-CN", { dateStyle: "medium", timeStyle: "medium" }).format(new Date(timestamp));
+      }
+
+      function setText(node, value) {
+        node.textContent = value;
+        return node;
+      }
+
+      function element(tag, className, text) {
+        var node = document.createElement(tag);
+        if (className) node.className = className;
+        if (typeof text === "string") node.textContent = text;
+        return node;
+      }
+
+      function clear(node) {
+        while (node.firstChild) node.removeChild(node.firstChild);
+      }
+
+      function renderHeader() {
+        var project = objectValue(report.project);
+        var tool = objectValue(report.tool);
+        var parts = [
+          stringValue(project.name, "未命名项目"),
+          frameworkText(project.framework),
+          buildModeText(project.buildMode),
+          dateText(report.generatedAt)
+        ];
+        if (stringValue(project.label, "")) parts.splice(1, 0, project.label);
+        setText(document.getElementById("hero-meta"), parts.join(" · "));
+        setText(document.getElementById("report-title"), stringValue(project.name, "微信小程序") + " · 体积分析报告");
+        document.title = stringValue(project.name, "微信小程序") + " · 体积分析报告";
+
+        var stages = objectValue(report.stages);
+        var definitions = [
+          ["分析", objectValue(stages.analysis)],
+          ["质量", objectValue(stages.quality)],
+          ["预览", objectValue(stages.preview)]
+        ];
+        var stageList = document.getElementById("stage-list");
+        definitions.forEach(function (definition) {
+          var status = stringValue(definition[1].status, "unknown");
+          var node = element("span", "stage status-" + safeStatus(status));
+          node.textContent = definition[0] + " · " + statusText(status);
+          var message = stringValue(definition[1].message, "");
+          if (message) node.title = message;
+          stageList.appendChild(node);
+        });
+        var toolText = [stringValue(tool.name, "工具未知"), stringValue(tool.version, "版本未知"), stringValue(tool.nodeVersion, "Node 未知")].join(" · ");
+        stageList.appendChild(element("span", "stage", toolText));
+      }
+
+      function frameworkText(value) {
+        if (value === "vue2-webpack") return "Vue 2 / webpack";
+        if (value === "vue3-vite") return "Vue 3 / Vite";
+        return "框架未知";
+      }
+
+      function buildModeText(value) {
+        if (value === "production") return "生产构建";
+        if (value === "existing") return "现有产物";
+        return "构建模式未知";
+      }
+
+      function safeStatus(value) {
+        return value === "ok" || value === "error" || value === "skipped" ? value : "unknown";
+      }
+
+      function statusText(value) {
+        if (value === "ok") return "完成";
+        if (value === "error") return "失败";
+        if (value === "skipped") return "跳过";
+        return "未知";
+      }
+
+      function renderOverview() {
+        var totals = objectValue(report.totals);
+        var definitions = [
+          ["文件体积合计", byteText(finiteNumber(totals.fileBytes, 0)), "来源：miniprogram-ci.analyseCode"],
+          ["文件数量", formatNumber(finiteNumber(totals.fileCount, files.length)), "analyseCode 返回的文件总数"],
+          ["上传预览包体积", byteText(totals.packedBytes), totals.packedBytes === null || typeof totals.packedBytes !== "number" ? "未取得官方 preview 结果" : "来源：miniprogram-ci.preview"],
+          ["未关联文件", byteText(finiteNumber(totals.unlinkedBytes, 0)), formatNumber(finiteNumber(totals.unlinkedCount, 0)) + " 个文件未关联到模块"]
+        ];
+        var container = document.getElementById("overview");
+        definitions.forEach(function (definition) {
+          var card = element("article", "card");
+          card.appendChild(element("p", "card-label", definition[0]));
+          card.appendChild(element("p", "card-value", definition[1]));
+          card.appendChild(element("p", "card-detail", definition[2]));
+          container.appendChild(card);
+        });
+      }
+
+      function renderSources() {
+        var measurement = objectValue(report.measurement);
+        var totals = objectValue(report.totals);
+        var definitions = [
+          ["文件体积来源", stringValue(measurement.fileSizeSource, "未提供")],
+          ["包体积来源", typeof totals.packedBytes === "number" ? stringValue(measurement.packageSizeSource, "来源未提供") : "未验证"],
+          ["树图口径", "始终基于 analyseCode 文件体积"]
+        ];
+        var panel = document.getElementById("source-panel");
+        definitions.forEach(function (definition) {
+          var item = element("div", "source-item");
+          item.appendChild(element("strong", "", definition[0]));
+          item.appendChild(element("span", "", definition[1]));
+          panel.appendChild(item);
+        });
+        var notes = arrayValue(measurement.notes);
+        var notesNode = document.getElementById("measurement-notes");
+        notes.forEach(function (note) {
+          notesNode.appendChild(element("li", "", String(note)));
+        });
+        if (!notes.length) notesNode.classList.add("hidden");
+      }
+
+      function renderPackageFilter() {
+        var container = document.getElementById("package-filter");
+        appendPackageButton(container, "*", "全部包");
+        var seen = new Set();
+        packages.forEach(function (packageItem) {
+          var name = stringValue(packageItem && packageItem.name, "");
+          if (!name || seen.has(name)) return;
+          seen.add(name);
+          appendPackageButton(container, name, packageLabel(packageItem));
+        });
+        files.forEach(function (file) {
+          var name = stringValue(file && file.package, "__APP__");
+          if (seen.has(name)) return;
+          seen.add(name);
+          appendPackageButton(container, name, name === "__APP__" ? "主包" : name);
+        });
+      }
+
+      function appendPackageButton(container, value, label) {
+        var button = element("button", "filter" + (value === selectedPackage ? " active" : ""), label);
+        button.type = "button";
+        button.dataset.package = value;
+        button.addEventListener("click", function () {
+          selectedPackage = value;
+          selectedTreePath = "";
+          Array.prototype.forEach.call(container.querySelectorAll("button"), function (item) {
+            item.classList.toggle("active", item.dataset.package === value);
+          });
+          renderTreemap();
+          document.getElementById("treemap").scrollTop = 0;
+          document.getElementById("treemap").scrollLeft = 0;
+          renderFileList();
+        });
+        container.appendChild(button);
+      }
+
+      function packageLabel(packageItem) {
+        var name = stringValue(packageItem && packageItem.name, "");
+        return stringValue(packageItem && packageItem.label, name === "__APP__" ? "主包" : name || "未命名包");
+      }
+
+      function renderPackageTable() {
+        var host = document.getElementById("package-table");
+        if (!packages.length) {
+          host.appendChild(element("p", "empty", "没有包级统计数据。"));
+          return;
+        }
+        var table = element("table", "package-table");
+        var head = element("thead", "");
+        var headRow = element("tr", "");
+        ["包", "文件数", "analyseCode 文件体积", "preview 包体积"].forEach(function (label) {
+          headRow.appendChild(element("th", "", label));
+        });
+        head.appendChild(headRow);
+        table.appendChild(head);
+        var body = element("tbody", "");
+        packages.forEach(function (packageItem) {
+          var row = element("tr", "");
+          row.appendChild(element("td", "", packageLabel(packageItem)));
+          row.appendChild(element("td", "", formatNumber(finiteNumber(packageItem && packageItem.fileCount, 0))));
+          row.appendChild(element("td", "", byteText(finiteNumber(packageItem && packageItem.fileBytes, 0))));
+          row.appendChild(element("td", "", byteText(packageItem && packageItem.packedBytes)));
+          body.appendChild(row);
+        });
+        table.appendChild(body);
+        host.appendChild(table);
+      }
+
+      function filteredFiles() {
+        if (selectedPackage === "*") return files.slice();
+        return files.filter(function (file) {
+          return stringValue(file && file.package, "__APP__") === selectedPackage;
+        });
+      }
+
+      function renderTreemap() {
+        var host = document.getElementById("treemap");
+        var note = document.getElementById("treemap-note");
+        clear(host);
+        var scoped = filteredFiles().filter(function (file) {
+          return finiteNumber(file && file.size, 0) >= 0;
+        }).sort(function (left, right) {
+          return finiteNumber(right && right.size, 0) - finiteNumber(left && left.size, 0);
+        });
+        var root = buildFileTree(scoped);
+        var current = root;
+        var trail = [];
+        var parts = selectedTreePath ? selectedTreePath.split("/") : [];
+        for (var index = 0; index < parts.length; index += 1) {
+          if (!current.directories.has(parts[index])) {
+            selectedTreePath = "";
+            current = root;
+            trail = [];
+            break;
+          }
+          current = current.directories.get(parts[index]);
+          trail.push(current);
+        }
+        // uniapp-wechat-package-optimizer 1.0.0: keep every file in the fixed viewport; dense trees use smaller rectangles.
+        var scope = element("header", "tree-scope");
+        var scopeName = stringValue(current && current.displayPath, "代码包");
+        renderTreeNavigation(scope, trail);
+        scope.appendChild(element("span", "tree-scope-size", "合计：" + byteText(current.size)));
+        // uniapp-wechat-package-optimizer 1.0.0: only the code-package root exposes a file count.
+        if (!selectedTreePath) scope.appendChild(element("span", "tree-scope-count", "包含 " + formatNumber(current.count) + " 个文件"));
+        scope.title = scopeName + " · 文件合计：" + formatNumber(current.size) + " B（analyseCode）";
+        host.appendChild(scope);
+        if (!scoped.length) {
+          host.appendChild(element("p", "empty", "当前范围没有文件数据。"));
+          note.textContent = "数据来源：miniprogram-ci.analyseCode 文件体积。";
+          return;
+        }
+        var width = host.clientWidth || 1180;
+        var height = Math.max(1, (host.clientHeight || 456) - 30);
+        var layout = prepareTreeLayout(current.children, width, height);
+        var canvas = element("div", "tree-canvas");
+        canvas.style.width = width + "px";
+        canvas.style.height = height + "px";
+        drawTreeLayout(layout, canvas, 0, 0, width, height, 0, 0);
+        host.appendChild(canvas);
+        note.textContent = "点击目录下钻，点击文件查看依赖。当前范围的全部文件始终绘制在固定视图中；空间较小时名称单行省略，悬停查看完整内容。面积按 analyseCode 文件体积计算，精确数值以标签为准。";
+      }
+
+      // uniapp-wechat-package-optimizer 1.0.0: directory scope is independent of file selection.
+      function navigateTree(path) {
+        selectedTreePath = path;
+        renderTreemap();
+        var host = document.getElementById("treemap");
+        host.scrollTop = 0;
+        host.scrollLeft = 0;
+        document.querySelector('#treemap .tree-scope #tree-navigation [aria-current="location"]').focus({ preventScroll: true });
+      }
+
+      function renderTreeNavigation(host, trail) {
+        var navigation = element("nav", "tree-navigation");
+        navigation.id = "tree-navigation";
+        navigation.setAttribute("aria-label", "树图面包屑导航");
+        var list = element("ol", "tree-breadcrumb");
+        appendTreeCrumb(list, "", "代码包");
+        trail.forEach(function (item) {
+          appendTreeCrumb(list, item.path, item.name);
+        });
+        navigation.appendChild(list);
+        host.appendChild(navigation);
+      }
+
+      // uniapp-wechat-package-optimizer 1.0.0: ancestors are links; the current location is text.
+      function appendTreeCrumb(host, path, name) {
+        var item = element("li", "");
+        if (host.children.length) {
+          var separator = element("span", "tree-breadcrumb-separator", "/");
+          separator.setAttribute("aria-hidden", "true");
+          item.appendChild(separator);
+        }
+        var current = path === selectedTreePath;
+        var crumb = element(current ? "span" : "a", "", name);
+        crumb.dataset.path = path;
+        crumb.title = path || name;
+        if (current) {
+          crumb.setAttribute("aria-current", "location");
+          crumb.tabIndex = -1;
+        } else {
+          crumb.href = "#treemap";
+          crumb.addEventListener("click", function (event) {
+            event.preventDefault();
+            navigateTree(path);
+          });
+        }
+        item.appendChild(crumb);
+        host.appendChild(item);
+      }
+
+      // uniapp-wechat-package-optimizer 1.0.0: package nodes are the first level so files from different packages never mix.
+      function buildFileTree(scoped) {
+        var root = { name: "代码包", displayPath: "代码包", children: [], directories: new Map(), packageNames: new Set(), size: 0, count: 0 };
+        scoped.forEach(function (file) {
+          var path = stringValue(file && file.path, "未知文件");
+          var parts = path.replace(/\\/g, "/").split("/").filter(Boolean);
+          var size = finiteNumber(file && file.size, 0);
+          var packageName = stringValue(file && file.package, "__APP__");
+          var packageItem = packages.find(function (item) { return item && item.name === packageName; }) || { name: packageName, root: packageName };
+          var packageKey = "@package:" + encodeURIComponent(packageName);
+          if (!root.directories.has(packageKey)) {
+            var packageNameLabel = packageName === "__APP__" ? "主包" : "分包 · " + packageLabel(packageItem);
+            var packageDirectory = {
+              name: packageNameLabel,
+              path: packageKey,
+              displayPath: "代码包 / " + packageNameLabel,
+              packageNode: true,
+              packageName: packageName,
+              children: [],
+              directories: new Map(),
+              packageNames: new Set(),
+              size: 0,
+              count: 0
+            };
+            root.directories.set(packageKey, packageDirectory);
+            root.children.push(packageDirectory);
+          }
+          root.size += size;
+          root.count += 1;
+          root.packageNames.add(packageName);
+          var parent = root.directories.get(packageKey);
+          parent.size += size;
+          parent.count += 1;
+          parent.packageNames.add(packageName);
+          var relativeParts = packageRelativeParts(parts, packageItem, packageName);
+          relativeParts.slice(0, -1).forEach(function (name, index) {
+            if (!parent.directories.has(name)) {
+              var directoryParts = relativeParts.slice(0, index + 1);
+              var directory = {
+                name: name,
+                path: packageKey + "/" + directoryParts.join("/"),
+                displayPath: parent.displayPath + " / " + name,
+                children: [],
+                directories: new Map(),
+                packageNames: new Set(),
+                size: 0,
+                count: 0
+              };
+              parent.directories.set(name, directory);
+              parent.children.push(directory);
+            }
+            parent = parent.directories.get(name);
+            parent.size += size;
+            parent.count += 1;
+            parent.packageNames.add(packageName);
+          });
+          parent.children.push({ name: relativeParts[relativeParts.length - 1] || parts[parts.length - 1] || path, path: path, file: file, size: size, count: 1 });
+        });
+        return root;
+      }
+
+      function packageRelativeParts(parts, packageItem, packageName) {
+        if (packageName === "__APP__") return parts;
+        var rootPath = stringValue(packageItem && packageItem.root, packageName).replace(/\\/g, "/");
+        var rootParts = rootPath.split("/").filter(Boolean);
+        var matchesRoot = rootParts.length && rootParts.every(function (name, index) { return parts[index] === name; });
+        return matchesRoot ? parts.slice(rootParts.length) : parts;
+      }
+
+      // uniapp-wechat-package-optimizer 1.0.0: proportional splits retain every file, even in dense trees.
+      function prepareTreeLayout(items, width, height) {
+        if (items.length === 1) {
+          var item = items[0];
+          if (item.file) return { item: item, weight: Math.max(1, item.size) };
+          return { item: item, content: prepareTreeLayout(item.children, width, height), weight: Math.max(1, item.size) };
+        }
+        items = items.slice().sort(function (left, right) { return right.size - left.size || left.name.localeCompare(right.name); });
+        var total = items.reduce(function (sum, item) { return sum + Math.max(1, item.size); }, 0);
+        var half = total / 2;
+        var running = 0;
+        var split = 1;
+        var bestDistance = Infinity;
+        for (var index = 1; index < items.length; index += 1) {
+          running += Math.max(1, items[index - 1].size);
+          var distance = Math.abs(half - running);
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            split = index;
+          }
+        }
+        var first = items.slice(0, split);
+        var second = items.slice(split);
+        var firstTotal = first.reduce(function (sum, item) { return sum + Math.max(1, item.size); }, 0);
+        var ratio = firstTotal / total;
+        var horizontal = width >= height;
+        var firstPlan = prepareTreeLayout(first, horizontal ? width * ratio : width, horizontal ? height : height * ratio);
+        var secondPlan = prepareTreeLayout(second, horizontal ? width * (1 - ratio) : width, horizontal ? height : height * (1 - ratio));
+        return {
+          first: firstPlan, second: secondPlan, horizontal: horizontal, weight: total
+        };
+      }
+
+      function drawTreeLayout(plan, host, x, y, width, height, depth, colorIndex) {
+        if (!plan.item) {
+          var available = plan.horizontal ? width : height;
+          var firstSize = available * plan.first.weight / plan.weight;
+          drawTreeLayout(plan.first, host, x, y, plan.horizontal ? firstSize : width, plan.horizontal ? height : firstSize, depth, colorIndex);
+          drawTreeLayout(plan.second, host, plan.horizontal ? x + firstSize : x, plan.horizontal ? y : y + firstSize, plan.horizontal ? width - firstSize : width, plan.horizontal ? height : height - firstSize, depth, colorIndex + 1);
+          return;
+        }
+        var item = plan.item;
+        var node = element(item.file ? "button" : "section", item.file ? "tree-node" : "tree-directory");
+        node.dataset.path = item.path;
+        node.style.left = x + "px";
+        node.style.top = y + "px";
+        node.style.width = width + "px";
+        node.style.height = height + "px";
+        node.title = stringValue(item.displayPath, item.path) + " · " + byteText(item.size) + "（" + formatNumber(item.size) + " B）";
+        node.setAttribute("aria-label", node.title);
+        if (item.file) {
+          node.type = "button";
+          node.style.background = treeColor(colorIndex);
+          node.appendChild(element("span", "tree-label", item.name));
+          node.appendChild(element("span", "tree-size", byteText(item.size)));
+          node.addEventListener("click", function (event) {
+            event.stopPropagation();
+            selectFile(item.path);
+          });
+        } else {
+          if (item.packageNode) {
+            node.classList.add("tree-package-directory");
+            node.dataset.package = item.packageName;
+          }
+          var label = element("button", "tree-directory-label");
+          label.type = "button";
+          label.setAttribute("aria-label", "进入目录 " + stringValue(item.displayPath, item.path));
+          label.title = "点击下钻：" + node.title;
+          label.addEventListener("click", function (event) {
+            event.stopPropagation();
+            navigateTree(item.path);
+          });
+          node.addEventListener("click", function (event) {
+            if (event.target === node) {
+              event.stopPropagation();
+              navigateTree(item.path);
+            }
+          });
+          label.appendChild(element("strong", "", item.name + "/"));
+          label.appendChild(element("span", "tree-directory-size", byteText(item.size)));
+          var headerHeight = Math.min(24, height * 0.22);
+          var inset = Math.min(3, Math.min(width, height) * 0.018);
+          label.style.height = headerHeight + "px";
+          node.appendChild(label);
+          drawTreeLayout(plan.content, node, inset, headerHeight, width - inset * 2, height - headerHeight - inset, depth + 1, colorIndex);
+        }
+        host.appendChild(node);
+      }
+
+      function treeColor(index) {
+        var colors = ["#75a7e9", "#8bb8ef", "#6fc8bb", "#8bd5ca", "#e6ba75", "#dca1a1", "#aaa7df", "#90b9cf"];
+        return colors[index % colors.length];
+      }
+
+      function renderFileList() {
+        var list = document.getElementById("file-list");
+        var query = document.getElementById("file-search").value.trim().toLowerCase();
+        clear(list);
+        var scoped = filteredFiles().filter(function (file) {
+          if (!query) return true;
+          var path = stringValue(file && file.path, "").toLowerCase();
+          var moduleId = stringValue(file && file.moduleId, "").toLowerCase();
+          return path.indexOf(query) !== -1 || moduleId.indexOf(query) !== -1;
+        }).sort(function (left, right) {
+          return finiteNumber(right && right.size, 0) - finiteNumber(left && left.size, 0);
+        });
+        var visible = scoped.slice(0, MAX_FILE_ROWS);
+        visible.forEach(function (file, index) {
+          var path = stringValue(file && file.path, "未知文件");
+          var item = element("li", "");
+          var button = element("button", "file-button" + (path === selectedFilePath ? " selected" : ""));
+          button.type = "button";
+          button.appendChild(element("span", "rank", String(index + 1)));
+          button.appendChild(element("span", "path", path));
+          button.appendChild(element("span", "size", byteText(file && file.size)));
+          button.addEventListener("click", function () { selectFile(path); });
+          item.appendChild(button);
+          list.appendChild(item);
+        });
+        if (!visible.length) list.appendChild(element("li", "empty", "没有匹配的文件。"));
+        document.getElementById("file-summary").textContent = "显示 " + formatNumber(visible.length) + " / 符合 " + formatNumber(scoped.length) + " 个；当前包范围共 " + formatNumber(filteredFiles().length) + " 个。列表最多显示 " + formatNumber(MAX_FILE_ROWS) + " 个，不将截断数量视为完整总量。";
+        if (selectedFilePath && !files.some(function (file) { return stringValue(file && file.path, "") === selectedFilePath; })) selectedFilePath = "";
+        if (!selectedFilePath && visible.length) selectedFilePath = stringValue(visible[0] && visible[0].path, "");
+        renderFileDetail();
+      }
+
+      function selectFile(path) {
+        selectedFilePath = path;
+        renderFileList();
+        document.getElementById("file-detail").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      function renderFileDetail() {
+        var host = document.getElementById("file-detail");
+        clear(host);
+        var file = files.find(function (candidate) {
+          return stringValue(candidate && candidate.path, "") === selectedFilePath;
+        });
+        if (!file) {
+          host.appendChild(element("p", "empty", "选择文件后查看模块依赖。"));
+          return;
+        }
+        host.appendChild(element("h3", "", "文件详情"));
+        host.appendChild(element("p", "detail-path", stringValue(file.path, "未知文件")));
+        var grid = element("div", "detail-grid");
+        appendDetailValue(grid, "体积", byteText(file.size));
+        appendDetailValue(grid, "扩展名", stringValue(file.ext, "未知"));
+        appendDetailValue(grid, "所属包", packageNameFromValue(file.package));
+        appendDetailValue(grid, "模块 ID", stringValue(file.moduleId, "未关联"));
+        host.appendChild(grid);
+        var module = moduleForFile(file);
+        if (!module) {
+          host.appendChild(element("p", "empty", "该文件没有可用的模块依赖信息。"));
+          return;
+        }
+        renderModuleDetail(host, module);
+      }
+
+      function appendDetailValue(container, label, value) {
+        var item = element("div", "");
+        item.appendChild(element("span", "", label));
+        item.appendChild(element("strong", "", value));
+        container.appendChild(item);
+      }
+
+      function packageNameFromValue(value) {
+        var name = stringValue(value, "__APP__");
+        var match = packages.find(function (packageItem) { return stringValue(packageItem && packageItem.name, "") === name; });
+        return match ? packageLabel(match) : name === "__APP__" ? "主包" : name;
+      }
+
+      function moduleForFile(file) {
+        var id = stringValue(file && file.moduleId, "");
+        var path = stringValue(file && file.path, "");
+        if (id && moduleById.has(id)) return moduleById.get(id);
+        if (path && moduleByPath.has(path)) return moduleByPath.get(path);
+        return null;
+      }
+
+      function renderModuleDetail(host, module) {
+        var moduleId = stringValue(module && module.id, "未知模块");
+        host.appendChild(element("p", "section-note", "模块 " + moduleId + " · " + stringValue(module && module.type, "类型未知")));
+        appendRelationGroup(host, "依赖模块", arrayValue(module && module.deps), "moduleId");
+        appendRelationGroup(host, "被依赖于", arrayValue(module && module.parentDeps), "originModuleId");
+        var errors = arrayValue(module && module.errors).slice();
+        if (module && module.buildError !== undefined && module.buildError !== null && module.buildError !== "") errors.unshift(module.buildError);
+        if (errors.length) {
+          var group = element("section", "relation-group");
+          group.appendChild(element("h3", "", "模块错误（" + formatNumber(errors.length) + "）"));
+          errors.slice(0, MAX_RELATIONS).forEach(function (error) {
+            group.appendChild(element("p", "relation-error", stringifyDetail(error)));
+          });
+          if (errors.length > MAX_RELATIONS) group.appendChild(element("p", "list-summary", relationSummary(MAX_RELATIONS, errors.length)));
+          host.appendChild(group);
+        }
+      }
+
+      function appendRelationGroup(host, title, relations, targetKey) {
+        var group = element("section", "relation-group");
+        group.appendChild(element("h3", "", title + "（" + formatNumber(relations.length) + "）"));
+        if (!relations.length) {
+          group.appendChild(element("p", "section-note", "无"));
+          host.appendChild(group);
+          return;
+        }
+        var list = element("ul", "relation-list");
+        relations.slice(0, MAX_RELATIONS).forEach(function (relation) {
+          var item = element("li", "relation-item");
+          var fallbackKey = targetKey === "originModuleId" ? "moduleId" : "originModuleId";
+          var moduleId = stringValue(relation && relation[targetKey], stringValue(relation && relation[fallbackKey], "未知模块"));
+          var labelParts = [moduleId];
+          var relationPath = stringValue(relation && relation.path, "");
+          var request = stringValue(relation && relation.request, "");
+          if (relationPath) labelParts.push(relationPath);
+          if (request) labelParts.push(request);
+          var button = element("button", "module-button", labelParts.join(" · "));
+          button.type = "button";
+          button.addEventListener("click", function () { showModule(moduleId); });
+          item.appendChild(button);
+          var error = stringValue(relation && relation.error, "");
+          if (error) item.appendChild(element("span", "relation-error", error));
+          list.appendChild(item);
+        });
+        group.appendChild(list);
+        if (relations.length > MAX_RELATIONS) group.appendChild(element("p", "list-summary", relationSummary(MAX_RELATIONS, relations.length)));
+        host.appendChild(group);
+      }
+
+      function relationSummary(shown, total) {
+        return "仅显示 " + formatNumber(shown) + " / " + formatNumber(total) + " 条，完整总量为 " + formatNumber(total) + "。";
+      }
+
+      function showModule(moduleId) {
+        var module = moduleById.get(moduleId);
+        if (!module) {
+          var host = document.getElementById("file-detail");
+          host.appendChild(element("p", "relation-error", "未找到模块 " + moduleId + " 的详细数据。"));
+          return;
+        }
+        var linkedFile = files.find(function (file) {
+          return stringValue(file && file.moduleId, "") === moduleId || stringValue(file && file.path, "") === stringValue(module.path, "");
+        });
+        if (linkedFile) {
+          selectedFilePath = stringValue(linkedFile.path, "");
+          renderFileList();
+          return;
+        }
+        var host = document.getElementById("file-detail");
+        clear(host);
+        host.appendChild(element("h3", "", "模块详情"));
+        host.appendChild(element("p", "detail-path", moduleId));
+        renderModuleDetail(host, module);
+      }
+
+      function renderQuality() {
+        var host = document.getElementById("quality-content");
+        var findings = arrayValue(report.findings);
+        var quality = arrayValue(report.quality);
+        if (!findings.length && !quality.length) {
+          host.appendChild(element("p", "empty", "暂无质量检查结果，请结合分析阶段状态确认检查是否完成。"));
+          return;
+        }
+        var list = element("ul", "issue-list");
+        findings.forEach(function (finding) {
+          var severity = safeSeverity(finding && finding.severity);
+          var item = element("li", "issue");
+          var head = element("div", "issue-head");
+          head.appendChild(element("h3", "", stringValue(finding && finding.title, "未命名问题")));
+          head.appendChild(element("span", "severity severity-" + severity, severityText(severity)));
+          item.appendChild(head);
+          item.appendChild(element("p", "", stringValue(finding && finding.description, "无说明")));
+          var evidence = stringValue(finding && finding.evidence, "");
+          if (evidence) item.appendChild(element("p", "", "证据：" + evidence));
+          appendFileTags(item, arrayValue(finding && finding.files));
+          list.appendChild(item);
+        });
+        quality.forEach(function (check) {
+          var item = element("li", "issue");
+          var head = element("div", "issue-head");
+          var wording = qualityWording(check);
+          head.appendChild(element("h3", "", wording.title));
+          head.appendChild(element("span", "severity " + (wording.status === "通过" ? "severity-info" : "severity-warning"), wording.status));
+          item.appendChild(head);
+          item.appendChild(element("p", "quality-description", wording.description));
+          var url = safeHttpUrl(check && check.docURL);
+          if (url) {
+            var link = element("a", "doc-link", "查看官方说明");
+            link.href = url;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            item.appendChild(link);
+          }
+          var original = element("details", "quality-original");
+          original.appendChild(element("summary", "", "查看官方原始结果（含规则标识与英文说明）"));
+          original.appendChild(element("pre", "quality-detail", stringifyDetail(check)));
+          item.appendChild(original);
+          list.appendChild(item);
+        });
+        host.appendChild(list);
+      }
+
+      // uniapp-wechat-package-optimizer 1.0.0: localize the presentation only; success and raw evidence stay intact.
+      // SDK text can describe a violation even for success=true; never infer status from that text.
+      function qualityWording(check) {
+        var definitions = new Map([
+          ["PACKAGE_SIZE_LIMIT", ["包体积检查", "本次通过 SDK 的包体积检查；此结果不代表微信最终打包体积已验证。", "本次未通过 SDK 的包体积检查，请核对原始统计与包归属；最终包体积仍需预览结果确认。"]],
+          ["JS_COMPRESS_OPEN", ["JavaScript 压缩配置", "SDK 配置检查显示已启用 JavaScript 压缩。", "SDK 配置检查未检测到启用 JavaScript 压缩。请结合构建配置和产物确认，不等同于产物一定未压缩。"]],
+          ["WXML_COMPRESS_OPEN", ["WXML 压缩配置", "SDK 配置检查显示已启用 WXML 压缩。", "SDK 配置检查未检测到启用 WXML 压缩，请核对构建与微信编译配置。"]],
+          ["WXSS_COMPRESS_OPEN", ["WXSS 压缩配置", "SDK 配置检查显示已启用 WXSS 压缩。", "SDK 配置检查未检测到启用 WXSS 压缩，请核对构建与微信编译配置。"]],
+          ["LAZYCODE_LOADING_OPEN", ["代码按需注入配置", "SDK 检查显示已启用代码按需注入。", "SDK 未检测到启用代码按需注入。可评估配置 lazyCodeLoading，并验证页面和组件兼容性。"]],
+          ["IMAGE_AND_AUDIO_LIMIT", ["图片与音频资源体积", "本次检查未发现超过该规则阈值的图片或音频资源。", "SDK 检测到超过该规则阈值的图片或音频资源，请核对文件明细并评估压缩或远程加载。"]],
+          ["CONTAINS_OTHER_PKG_JS", ["分包专用脚本归属", "本次检查未发现仅由分包依赖、却留在主包的脚本。", "SDK 检测到仅由分包依赖、却留在主包的脚本，请核对引用关系后评估迁移。"]],
+          ["CONTAINS_OTHER_PKG_COMPONENTS", ["分包专用组件归属", "本次检查未发现仅由分包依赖、却留在主包的组件。", "SDK 检测到仅由分包依赖、却留在主包的组件，请核对组件注册和引用后评估迁移。"]],
+          ["CONTAINS_UNUSED_PLUGINS", ["未使用插件检查", "本次静态检查未发现未使用的插件。", "SDK 标记了可能未使用的插件，请核对实际使用情况，不要直接删除。"]],
+          ["CONTAINS_UNUSED_COMPONENTS", ["未使用组件检查", "本次静态检查未发现未使用的组件。", "SDK 标记了可能未使用的组件，请核对动态引用与注册配置，不要直接删除。"]],
+          ["CONTAINS_UNUSED_CODES", ["未关联依赖的文件", "本次官方检查未标记缺少依赖关联的文件，不代表所有运行时引用均已验证。", "SDK 标记了缺少依赖关联的文件。动态资源路径和平台约定可能未被静态分析覆盖，不能据此直接删除。"]]
+        ]);
+        var definition = definitions.get(check && check.name);
+        var status = check && check.success === true ? "通过" : (check && check.success === false ? "未通过" : "未确认");
+        var description = "此检查项尚无中文解释，请展开官方原始结果核对具体规则。";
+        if (definition) description = status === "未确认" ? "SDK 未返回明确的通过状态，请展开官方原始结果核实。" : definition[status === "通过" ? 1 : 2];
+        return { title: definition ? definition[0] : "其他官方检查", status: status, description: description };
+      }
+
+      function safeSeverity(value) {
+        return value === "error" || value === "warning" || value === "info" ? value : "info";
+      }
+
+      function severityText(value) {
+        if (value === "error") return "错误";
+        if (value === "warning") return "警告";
+        return "提示";
+      }
+
+      function safeHttpUrl(value) {
+        if (typeof value !== "string") return "";
+        try {
+          var parsed = new URL(value);
+          return parsed.protocol === "http:" || parsed.protocol === "https:" ? parsed.href : "";
+        } catch (error) {
+          return "";
+        }
+      }
+
+      function stringifyDetail(value) {
+        try {
+          return typeof value === "string" ? value : JSON.stringify(value, null, 2);
+        } catch (error) {
+          return String(value);
+        }
+      }
+
+      function appendFileTags(host, tagFiles) {
+        if (!tagFiles.length) return;
+        var tags = element("div", "file-tags");
+        tagFiles.slice(0, 20).forEach(function (path) {
+          var button = element("button", "file-tag", String(path));
+          button.type = "button";
+          button.addEventListener("click", function () { selectFile(String(path)); });
+          tags.appendChild(button);
+        });
+        if (tagFiles.length > 20) tags.appendChild(element("span", "list-summary", "另有 " + formatNumber(tagFiles.length - 20) + " 个文件"));
+        host.appendChild(tags);
+      }
+
+      function renderDuplicates() {
+        var host = document.getElementById("duplicate-content");
+        var duplicates = arrayValue(report.duplicates).slice().sort(function (left, right) {
+          return finiteNumber(right && right.potentialBytes, 0) - finiteNumber(left && left.potentialBytes, 0);
+        });
+        if (!duplicates.length) {
+          host.appendChild(element("p", "empty", "没有发现重复资源。"));
+          return;
+        }
+        var list = element("ul", "duplicate-list");
+        duplicates.forEach(function (duplicate) {
+          var paths = arrayValue(duplicate && duplicate.paths);
+          var item = element("li", "duplicate");
+          item.appendChild(element("h3", "", byteText(duplicate && duplicate.size) + " × " + formatNumber(paths.length) + " 份"));
+          item.appendChild(element("p", "", "理论可减少 " + byteText(duplicate && duplicate.potentialBytes) + " · SHA-256 " + stringValue(duplicate && duplicate.sha256, "未知")));
+          appendFileTags(item, paths);
+          list.appendChild(item);
+        });
+        host.appendChild(list);
+      }
+
+      function renderComparison() {
+        var comparison = report.comparison;
+        if (!comparison || typeof comparison !== "object") return;
+        var section = document.getElementById("comparison-section");
+        section.classList.remove("hidden");
+        document.getElementById("comparison-note").textContent = "基准生成于 " + dateText(comparison.baselineGeneratedAt) + " · " + (comparison.comparable === true ? "可直接比较" : "口径可能不一致");
+        var host = document.getElementById("comparison-content");
+        arrayValue(comparison.warnings).forEach(function (warning) {
+          host.appendChild(element("p", "comparison-warning", String(warning)));
+        });
+        var totals = objectValue(comparison.totals);
+        var rows = [
+          ["文件体积合计", objectValue(totals.fileBytes)],
+          ["上传预览包体积", totals.packedBytes && typeof totals.packedBytes === "object" ? totals.packedBytes : null]
+        ];
+        var table = comparisonTable(["指标", "基准", "当前", "变化"], rows.map(function (row) {
+          var metric = row[1];
+          return [row[0], metric ? byteText(metric.before) : "未验证", metric ? byteText(metric.after) : "未验证", metric ? deltaNode(metric.delta) : element("span", "", "未验证")];
+        }));
+        host.appendChild(table);
+        renderComparisonPackages(host, arrayValue(comparison.packages));
+        renderComparisonFiles(host, arrayValue(comparison.files));
+      }
+
+      function comparisonTable(headers, rows) {
+        var table = element("table", "comparison-table");
+        var head = element("thead", "");
+        var headRow = element("tr", "");
+        headers.forEach(function (header) { headRow.appendChild(element("th", "", header)); });
+        head.appendChild(headRow);
+        table.appendChild(head);
+        var body = element("tbody", "");
+        rows.forEach(function (cells) {
+          var row = element("tr", "");
+          cells.forEach(function (cell) {
+            var td = element("td", "");
+            if (cell && typeof cell === "object" && cell.nodeType) td.appendChild(cell);
+            else td.textContent = String(cell);
+            row.appendChild(td);
+          });
+          body.appendChild(row);
+        });
+        table.appendChild(body);
+        return table;
+      }
+
+      function deltaNode(value) {
+        if (typeof value !== "number" || !Number.isFinite(value)) return element("span", "", "未验证");
+        var className = value > 0 ? "delta-positive" : value < 0 ? "delta-negative" : "delta-zero";
+        var prefix = value > 0 ? "+" : "";
+        return element("span", className, prefix + byteText(value));
+      }
+
+      function renderComparisonPackages(host, comparisonPackages) {
+        if (!comparisonPackages.length) return;
+        host.appendChild(element("h3", "", "包体积变化"));
+        var rows = [];
+        comparisonPackages.forEach(function (packageItem) {
+          var fileBytes = objectValue(packageItem && packageItem.fileBytes);
+          var packedBytes = packageItem && packageItem.packedBytes && typeof packageItem.packedBytes === "object" ? packageItem.packedBytes : null;
+          var name = stringValue(packageItem && packageItem.name, "未命名包");
+          rows.push([
+            name === "__APP__" ? "主包" : name,
+            "analyseCode 文件体积",
+            byteText(fileBytes.before),
+            byteText(fileBytes.after),
+            deltaNode(fileBytes.delta)
+          ]);
+          rows.push([
+            name === "__APP__" ? "主包" : name,
+            "preview 包体积",
+            packedBytes ? byteText(packedBytes.before) : "未验证",
+            packedBytes ? byteText(packedBytes.after) : "未验证",
+            packedBytes ? deltaNode(packedBytes.delta) : element("span", "", "未验证")
+          ]);
+        });
+        host.appendChild(comparisonTable(["包", "口径", "基准", "当前", "变化"], rows));
+      }
+
+      function renderComparisonFiles(host, comparisonFiles) {
+        if (!comparisonFiles.length) return;
+        var sorted = comparisonFiles.slice().sort(function (left, right) {
+          return Math.abs(finiteNumber(right && right.delta, 0)) - Math.abs(finiteNumber(left && left.delta, 0));
+        });
+        host.appendChild(element("h3", "", "文件变化（按变化绝对值排序）"));
+        var visible = sorted.slice(0, MAX_FILE_ROWS);
+        var rows = visible.map(function (file) {
+          return [
+            stringValue(file && file.path, "未知文件"),
+            comparisonStatusText(file && file.status),
+            byteText(file && file.before),
+            byteText(file && file.after),
+            deltaNode(file && file.delta)
+          ];
+        });
+        host.appendChild(comparisonTable(["文件", "状态", "基准", "当前", "变化"], rows));
+        if (sorted.length > MAX_FILE_ROWS) host.appendChild(element("p", "list-summary", "仅显示 " + formatNumber(MAX_FILE_ROWS) + " / " + formatNumber(sorted.length) + " 个变化文件，完整总量为 " + formatNumber(sorted.length) + "。"));
+      }
+
+      function comparisonStatusText(value) {
+        if (value === "added") return "新增";
+        if (value === "removed") return "移除";
+        if (value === "changed") return "变化";
+        return "未知";
+      }
+
+      function renderFooter() {
+        document.getElementById("footer").textContent = "Schema v" + String(finiteNumber(report.schemaVersion, 1)) + " · 单文件离线报告 · 未设置或推断任何微信包体积上限";
+      }
+
+      function debounce(callback, delay) {
+        var timer = 0;
+        return function () {
+          window.clearTimeout(timer);
+          timer = window.setTimeout(callback, delay);
+        };
+      }
+    }());
+  </script>
+</body>
+</html>
