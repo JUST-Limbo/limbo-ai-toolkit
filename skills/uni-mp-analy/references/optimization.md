@@ -31,6 +31,4 @@
 5. 若用户要求验证最终包体，在两侧均有可比 `preview.subPackageInfo` 后再给出最终节省量；只有本地文件对比时明确这个边界。
 6. 执行项目可用的回归检查；需要真机而当前不可用时列明待验页面和交互。
 
-如优化无收益、出现编译/依赖错误或运行退化，定位原因并调整；必要时只撤回本次自己的修改，不重置用户工作区。
-
 参考：[DCloud 分包优化配置](https://uniapp.dcloud.net.cn/collocation/manifest.html)、[页面与分包配置](https://uniapp.dcloud.net.cn/collocation/pages.html)、[微信官方 CI](https://github.com/wechat-miniprogram/miniprogram-ci-dist)。
