@@ -1,4 +1,4 @@
-// uniapp-wechat-package-optimizer 1.0.0
+// uni-mp-analy 2.0.0
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { safeFile, digest, stableJson } from './lib.mjs';

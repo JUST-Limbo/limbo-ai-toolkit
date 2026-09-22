@@ -1,4 +1,4 @@
 interface:
   display_name: "uni-app 微信包体分析优化"
   short_description: "分析 Vue 2 与 Vue 3 微信小程序主包、分包和依赖，生成离线报告并验证优化结果"
-  default_prompt: "使用 $uniapp-wechat-package-optimizer 分析当前 uni-app CLI 工程，生成微信小程序包体报告并提出有证据的优化建议。"
+  default_prompt: "使用 $uni-mp-analy 分析当前 uni-app CLI 工程，生成微信小程序包体报告并提出有证据的优化建议。"

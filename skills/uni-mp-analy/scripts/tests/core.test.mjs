@@ -1,4 +1,4 @@
-// uniapp-wechat-package-optimizer 1.0.0
+// uni-mp-analy 2.0.0
 // 本文件中的目录、JSON 和分析结果均为 node:test 合成测试数据，不代表真实微信 SDK 实测结果。
 import test from 'node:test';
 import assert from 'node:assert/strict';

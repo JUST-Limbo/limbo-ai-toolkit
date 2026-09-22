@@ -1,4 +1,4 @@
-// uniapp-wechat-package-optimizer 1.0.0
+// uni-mp-analy 2.0.0
 // Separate process: the SDK may retain handles; the parent owns timeout and completion.
 const fs = require('node:fs');
 const path = require('node:path');
@@ -24,7 +24,7 @@ process.once('message', async ({ stage, projectPath, output, appid, robot }) => 
     if (stage === 'analysis') result = await ci.analyseCode(project, { silent: true });
     else if (stage === 'quality') result = await ci.checkCodeQuality(project);
     else if (stage === 'preview') result = await ci.preview({
-      project, desc: 'uniapp-wechat-package-optimizer analysis', robot, threads: 2,
+      project, desc: 'uni-mp-analy analysis', robot, threads: 2,
       setting: { useProjectConfig: true },
       qrcodeFormat: 'image', qrcodeOutputDest: path.join(path.dirname(output), 'preview-qrcode.jpg'),
       onProgressUpdate() {},

@@ -1,4 +1,4 @@
-// uniapp-wechat-package-optimizer 1.0.0
+// uni-mp-analy 2.0.0
 // 本文件仅使用 node:test 临时生成的原生小程序合成夹具验证 SDK API，不代表真实 uni-app 工程或业务数据。
 import test from 'node:test';
 import assert from 'node:assert/strict';

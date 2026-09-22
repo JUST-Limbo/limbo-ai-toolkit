@@ -1,10 +1,10 @@
 ---
-name: uniapp-wechat-package-optimizer
+name: uni-mp-analy
 description: Analyze and optimize WeChat mini-program package size for Vue 2 and Vue 3 uni-app CLI projects. Build production artifacts, collect miniprogram-ci dependency and quality data, generate an offline HTML treemap report, and verify source-level optimizations with before/after measurements. Use for main-package bloat, subpackage planning, dependency attribution, or package-size audits; excludes HBuilderX-managed projects and other mini-program platforms.
 metadata:
-  x-skill-version: "1.0.0"
+  x-skill-version: "2.0.0"
   x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
-  x-source-path: "skills/uniapp-wechat-package-optimizer"
+  x-source-path: "skills/uni-mp-analy"
 ---
 
 # uni-app 微信小程序包体分析与优化
@@ -21,7 +21,7 @@ metadata:
 
 典型请求：
 
-- “使用 uniapp-wechat-package-optimizer 分析当前项目，给我包体报告。”
+- “使用 uni-mp-analy 分析当前项目，给我包体报告。”
 - “查看为什么 vendor.js 留在主包，先给优化方案。”
 - “按已经确认的方案优化分包，重新构建并比较结果。”
 - “使用提供的 AppID 和本地密钥生成预览，验证微信实际包体。”
@@ -64,7 +64,7 @@ node <skill>/scripts/analyze.mjs --root <工程根目录> --output <新报告目
 
 需要制定或实施优化时阅读 [优化决策](references/optimization.md)。每项建议至少给出产物路径、引用证据、对应源码位置、预计影响和验证方法。估算与实测分开写，不能把重复字节或未关联字节直接当成可节省体积。
 
-遵循用户授权改动源码，一次聚焦一组可验证的变化。对被修改代码留下简短 `uniapp-wechat-package-optimizer 1.0.0` 注释，沿用语言原生注释格式；严格 JSON 不插入非法注释，可在相邻被改动的脚本标注关联配置。发现同区域有本 Skill 旧版本注释时，按目标目录规则先让用户明确版本处理方式。
+遵循用户授权改动源码，一次聚焦一组可验证的变化。对被修改代码留下简短 `uni-mp-analy 2.0.0` 注释，沿用语言原生注释格式；严格 JSON 不插入非法注释，可在相邻被改动的脚本标注关联配置。发现同区域有本 Skill 旧版本注释时，按目标目录规则先让用户明确版本处理方式。
 
 ### 5. 重建与对比
 
