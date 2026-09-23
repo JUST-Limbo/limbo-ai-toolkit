@@ -1,20 +1,20 @@
 ---
-name: long-task-state
+name: task-journey
 description: >-
   Assess whether a long-running, multi-stage, or context-heavy task would
   benefit from durable working state, ask the user before enabling it, and then
   maintain a compact, verifiable plan with milestones, progress, route changes,
   and optional bounded delegation if approved. Use when continuing a task with
-  existing long-task-state data or when the user wants an optional project-level
-  probe so new conversations can notice unfinished state. Do not create state,
+  existing task-journey or legacy long-task-state data, or when the user wants
+  an optional project-level probe so new conversations can notice unfinished state. Do not create state,
   delegate work, or modify project instructions beyond the user's task scope.
 metadata:
-  x-skill-version: "1.3.0"
+  x-skill-version: "1.4.0"
   x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
-  x-source-path: "skills/long-task-state"
+  x-source-path: "skills/task-journey"
 ---
 
-# Long Task State
+# Task Journey
 
 ## 功能说明
 
@@ -48,7 +48,7 @@ Skill 本身按语义发现，不能保证新对话主动扫描状态目录。�
 用户可以显式调用：
 
 ```text
-使用 long-task-state 维护这个长期任务的状态
+使用 task-journey 维护这个长期任务的状态
 ```
 
 Agent 根据任务特征自动发现本 Skill 后，先说明启用原因、将维护的内容和默认存放位置，再询问是否启用。客户端提供结构化问答控件时优先使用；否则使用简短的普通问题。用户明确同意后再创建或更新状态；拒绝、取消或未作答时不启用，并继续按普通方式处理原任务。同一任务被拒绝后不重复询问，除非用户主动提出，或任务范围实质扩大并产生新的状态丢失风险。
@@ -64,35 +64,35 @@ Agent 根据任务特征自动发现本 Skill 后，先说明启用原因、将�
 配置探针时：
 
 1. 先完成目标目录的规则预检查，确认目标 Agent 实际会在新会话加载哪个项目级指令文件。Codex 通常使用适用作用域内的 `AGENTS.md`；其它 Agent 应依据目标项目约定和该工具当前支持的加载机制，不得猜测路径。
-2. 重新读取目标文件并保留现有内容。在最接近实际状态载体且能覆盖目标工作区的指令文件中加入下面的有界区块；已有同名区块时只在用户要求升级后更新区块内部，不重复追加。
+2. 重新读取目标文件并保留现有内容。在最接近实际状态载体且能覆盖目标工作区的指令文件中加入下面的有界区块；已有 `task-journey` 或旧 `long-task-state` 发现区块时不重复追加，只在用户要求升级后更新原区块。
 3. 若多个 Agent 需要自动发现，逐一说明必须修改的项目级指令文件并取得授权；不能因为某个工具已配置，就假设其它工具也会加载同一文件。
 4. 找不到可靠的常驻指令入口时，报告该环境只能按语义或显式调用 Skill，不能承诺自动发现；不要创建不会被加载的占位文件。
 
 下面区块适用于专用状态目录。若状态复用现有计划、Issue 或任务体系，应把检查目标改为实际状态载体及其最低成本的状态摘要入口；已有项目指令已经可靠要求新会话读取该载体时，不重复安装探针。无法低成本判断外部状态是否未完成时，只保留精确入口并在相关请求出现后核对，不要让每个新会话完整加载外部任务历史。
 
 ```markdown
-<!-- long-task-state:auto-discovery v2 -->
+<!-- task-journey:auto-discovery v2 -->
 ## 长任务状态发现
 
-每个新会话首次开始实质工作前，若 `.long-task-state/*.md` 存在：
+每个新会话首次开始实质工作前，若 `.task-journey/*.md` 或旧的 `.long-task-state/*.md` 存在：
 
 - 先只读取 YAML frontmatter，查找 `active` 或 `blocked` 状态，不批量加载正文。
-- 根据当前请求、任务标识、Issue、分支、`current_milestone` 与 `next_action` 判断是否有匹配状态；匹配时先告知用户，再使用 `long-task-state` Skill 完整核对并恢复。
+- 根据当前请求、任务标识、Issue、分支、`current_milestone` 与 `next_action` 判断是否有匹配状态；匹配时先告知用户，再使用 `task-journey` Skill 完整核对并恢复。
 - 多个候选无法可靠判断时，只列出必要摘要并请用户选择；不要接管无关状态，也不要扩大当前任务范围。
-<!-- /long-task-state:auto-discovery -->
+<!-- /task-journey:auto-discovery -->
 ```
 
-探针属于项目级的持续选择，不随单个任务完成自动删除；已有 `v1` 探针仍能按 `status` 发现任务，无须仅因状态协议升级而修改。用户要求升级时才用 `v2` 替换旧区块；用户要求关闭自动发现时，只删除对应有界区块并保留周围内容。探针只能发现当前工作区可访问的状态，不能跨项目、未同步的 worktree 或不可访问的主机恢复任务。
+探针属于项目级的持续选择，不随单个任务完成自动删除；已有 `long-task-state` 的 `v1` 或 `v2` 探针仍可发现旧目录中的任务，无须仅因 Skill 改名而修改。用户要求升级时才用上面的新区块替换旧区块；用户要求关闭自动发现时，只删除对应有界区块并保留周围内容。探针只能发现当前工作区可访问的状态，不能跨项目、未同步的 worktree 或不可访问的主机恢复任务。
 
 ## 状态文件结构
 
 优先复用目标工作区已有且能够承载下列信息的任务体系。没有合适载体时，创建：
 
 ```text
-.long-task-state/<task-slug>.md
+.task-journey/<task-slug>.md
 ```
 
-每个任务使用独立文件。`<task-slug>` 优先采用 Issue 标识或分支语义，否则从任务目标生成简短的 kebab-case 名称；名称冲突时，在确认不是同一任务后追加最小可区分后缀。
+每个任务使用独立文件。已存在的 `.long-task-state/<task-slug>.md` 继续在原路径维护，不因 Skill 改名而迁移。`<task-slug>` 优先采用 Issue 标识或分支语义，否则从任务目标生成简短的 kebab-case 名称；名称冲突时，在确认不是同一任务后追加最小可区分后缀。
 
 状态文件使用以下核心结构；可以按任务需要增加章节，但不得删除核心字段和章节：
 
@@ -256,9 +256,10 @@ blocked_on: null
 
 ## Version Notes
 
-- Current effective version: `1.3.0`
+- Current effective version: `1.4.0`
 - Default behavior when user does not specify version: use this latest `SKILL.md`.
-- Historical snapshots should be kept under `history/skills/long-task-state/<version>.md` at the repository root; do not place snapshots inside the distributable Skill directory or name them `SKILL.md`.
+- Historical snapshots should be kept under `history/skills/task-journey/<version>.md` at the repository root; do not place snapshots inside the distributable Skill directory or name them `SKILL.md`.
+- `1.4.0`: Skill 更名为 `task-journey`；新任务默认使用 `.task-journey/`，并保留对旧 `.long-task-state/` 状态及发现探针的兼容。
 - `1.3.0`: 增加开始执行前的可验证里程碑计划、进度摘要、计划修订与基于证据的重新规划；增加有界子 Agent 委派、单写者并发约束、宿主能力协商以及 `light` / `standard` / `heavy` 模型与思考强度路由；状态协议升级为 `1.2.0` 并兼容原位迁移旧状态，自动发现探针升级为 `v2`。
 - `1.2.0`: 增加需单独授权的项目级轻量发现探针，使新对话可低成本发现 `active` / `blocked` 状态；明确 Skill 单独安装只能尽力触发，并限定多 Agent、作用域、重复安装与移除行为；同时将版本与来源治理字段迁入 `metadata`，兼容官方 SKILL.md 校验器。状态文件结构未变，`protocol_version` 继续使用 `1.1.0`。
 - `1.1.0`: 默认状态路径由 `.agent/task-state/<task-slug>.md` 调整为与 Skill 同名的 `.long-task-state/<task-slug>.md`，避免和 `.agents/` Skill 安装目录混淆。
