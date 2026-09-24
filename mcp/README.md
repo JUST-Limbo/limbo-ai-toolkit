@@ -8,7 +8,7 @@
 
 ## 取用原则
 
-取用方只复制各 MCP 的 `dist/*.cjs` 构建产物，无需 `npm install`，不必复制源码。构建产物的目标存放位置、MCP 配置文件及重载方式，由调用方根据所用客户端的规则决定。
+取用方按各 MCP 的 README 白名单复制文件。TinyPNG 两项只需对应的 `dist/*.cjs` 构建产物；`sharp-image-mcp` 还需复制包清单并在目标机器安装 Sharp 的原生依赖。构建产物的目标存放位置、MCP 配置文件及重载方式，由调用方根据所用客户端的规则决定。
 
 ---
 
@@ -18,6 +18,7 @@
 |------|------|----------|
 | `tinypng-mcp` | 使用 TinyPNG 官方 API 压缩或转换图片，须 API Key | [README](tinypng-mcp/README.md) · [免责声明](tinypng-mcp/DISCLAIMER.md) |
 | `tinypng-web-mcp` | 通过 TinyPNG 未公开 Web 后台免 Key 压缩 PNG/JPG，不适合生产 | [README](tinypng-web-mcp/README.md) · [免责声明](tinypng-web-mcp/DISCLAIMER.md) |
+| `sharp-image-mcp` | 本地并行优化图片，支持多格式、画质控制和可选 HTML 滑块对比报告 | [README](sharp-image-mcp/README.md) |
 
 ---
 

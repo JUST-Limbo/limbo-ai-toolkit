@@ -63,6 +63,7 @@ history/     已发布资产的历史快照（维护与审计使用，不向使�
 |------|------|
 | [`tinypng-mcp`](mcp/tinypng-mcp/README.md) | 通过 TinyPNG 官方 API 压缩或转换 PNG/JPG/WebP/AVIF；MCP Tools + CLI；须 `TINIFY_API_KEY` |
 | [`tinypng-web-mcp`](mcp/tinypng-web-mcp/README.md) | 走官网 Web 后台免 Key 压缩 PNG/JPG；不稳定，仅建议学习；使用前阅读对应免责声明 |
+| [`sharp-image-mcp`](mcp/sharp-image-mcp/README.md) | 本地并行输出 JPEG/PNG/WebP/AVIF，可调画质；可生成交互式前后画质对比 HTML |
 
 功能详情与 Version Notes：Skill 见各 `SKILL.md`；Rule 见 [rules/README.md](rules/README.md)；MCP 见 [mcp/README.md](mcp/README.md)。来源 / 实现参考标注见 [AGENTS.md](AGENTS.md#实现参考标注readme--正文)。
 

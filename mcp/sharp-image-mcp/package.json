@@ -1,0 +1,36 @@
+{
+  "name": "@limbo/sharp-image-mcp",
+  "version": "1.0.0",
+  "description": "基于 Sharp 的本地图片优化 MCP，支持并行、多格式、画质控制和可选 HTML 对比报告",
+  "type": "module",
+  "bin": {
+    "sharp-image-mcp-server": "dist/sharp-image-mcp.cjs"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "mcp": "node dist/sharp-image-mcp.cjs",
+    "test": "npm run build && node --test"
+  },
+  "keywords": [
+    "mcp",
+    "image",
+    "sharp",
+    "optimize"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "sharp": "^0.35.4",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}
