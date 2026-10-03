@@ -8,7 +8,7 @@
 
 ## 取用原则
 
-取用方按各 MCP 的 README 白名单复制文件。TinyPNG 两项只需对应的 `dist/*.cjs` 构建产物；`sharp-image-mcp` 还需复制包清单并在目标机器安装 Sharp 的原生依赖。构建产物的目标存放位置、MCP 配置文件及重载方式，由调用方根据所用客户端的规则决定。
+取用方按各 MCP 的 README 白名单复制文件。TinyPNG 两项只需对应的 `dist/*.cjs`；`sharp-image-mcp` 复制整个 `dist/`（CJS 与同级 `runtime/`），无需再安装依赖。构建产物的目标存放位置、MCP 配置文件及重载方式，由调用方根据所用客户端的规则决定。
 
 ---
 

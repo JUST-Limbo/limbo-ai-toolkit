@@ -26,6 +26,7 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@img/sharp-wasm32": "0.35.4",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "sharp": "^0.35.4",
     "zod": "^4.4.3"

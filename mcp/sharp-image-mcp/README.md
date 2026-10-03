@@ -8,6 +8,8 @@ x-source-path: mcp/sharp-image-mcp
 
 # sharp-image-mcp
 
+> **取用原则**：从 `mcp/sharp-image-mcp/dist/` **复制整个目录**（`sharp-image-mcp.cjs` 与 `runtime/` 必须保持同级）。目标存放位置与 MCP 配置文件由调用方根据所用客户端的规则决定；无需 `npm install`，不必复制 `src/` 等源码。只复制单个 CJS 无法运行。
+
 ## 功能说明
 
 基于开源库 [Sharp](https://github.com/lovell/sharp) 在本地优化图片，无需图片服务或 API Key。一个 `optimize_images` 工具接收多张本地图片，默认按 **4 个并行任务**输出 JPEG、PNG、WebP、AVIF 全部格式；指定 `formats` 时仅输出所需格式。默认画质参数为 **80**，适用于 JPEG、PNG、WebP、AVIF。
@@ -26,7 +28,7 @@ npm ci
 npm test
 ```
 
-`npm test` 会先生成 `dist/sharp-image-mcp.cjs`，再运行单元与 MCP 协议测试。修改为自己的仓库路径后，在支持 stdio 的 MCP 客户端中配置：
+`npm test` 会先生成 `dist/sharp-image-mcp.cjs` 与同目录的 `runtime/`，再运行单元、协议与隔离取用测试。修改为自己的仓库路径后，在支持 stdio 的 MCP 客户端中配置：
 
 ```json
 {
@@ -70,4 +72,6 @@ npm test
 
 ## 对外分发
 
-Sharp 含平台相关的原生依赖，本 MCP **不能只复制单个 CJS 文件**。按白名单复制 `dist/sharp-image-mcp.cjs`、`package.json`、`package-lock.json` 到目标目录，然后在该目录运行 `npm ci --omit=dev`。配置文件指向复制后的 `dist/sharp-image-mcp.cjs`。不要复制本仓库的 `node_modules`、`tests` 或 `history`。
+从 `mcp/sharp-image-mcp/dist/` **复制整个目录**（`sharp-image-mcp.cjs` 与 `runtime/` 必须保持同级）。目标存放位置与 MCP 配置文件由调用方根据所用客户端的规则决定；配置指向复制后的 `sharp-image-mcp.cjs`。无需 `npm install`，不必复制 `package.json`、`src/`、`tests`、`node_modules` 或 `history`。只复制单个 CJS、不带 `runtime/` 无法运行。
+
+`runtime/` 内置跨平台 WebAssembly 版 Sharp，体积约 9MB，换机器不必再装原生依赖。若目标环境已有对应平台的 Sharp 原生模块，进程会优先使用原生实现。
