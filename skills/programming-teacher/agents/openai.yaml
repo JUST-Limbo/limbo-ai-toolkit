@@ -2,3 +2,6 @@ interface:
   display_name: "编程老师"
   short_description: "用 HTML 课件开展长期编程课程，会话导读与代码反馈，资料保存在 .learning"
   default_prompt: "使用 $programming-teacher 规划长期编程课程，以 HTML 课件授课并通过会话互动与代码反馈指导学习，将课件、教学大纲、练习与参考答案、学生笔记保存在学习项目的 .learning/ 中。"
+
+policy:
+  allow_implicit_invocation: false
