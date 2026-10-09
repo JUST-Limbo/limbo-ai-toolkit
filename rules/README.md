@@ -58,7 +58,7 @@ alwaysApply: true
 - Vue/React 页面层 API 用 async/await；新代码禁用 `?.` / `!` / `??`
 - 创建或调整 DOM 结构时检查节点职责变化，避免新增或遗留冗余层级
 - 动作链（提交、推送、批量改动等）前做目录规则预检查
-- Git 远程失败时说明原因、提示开代理，仅用**临时 proxy** 重试
+- Git 远程操作前核实代理：GitHub HTTPS 主动尝试本地 7897，内网显式临时直连，按错误原因重试
 
 **不负责的范围**
 
@@ -70,6 +70,10 @@ alwaysApply: true
 规则正文：[`agent-global-baseline.md`](agent-global-baseline.md)。复制、frontmatter 调整、对照上游更新见上文 [取用方式](#取用方式)。
 
 #### Version Notes
+
+**1.5.0**
+
+- 改造 Git 远程代理策略：GitHub HTTPS 核实后主动尝试 7897，内网显式临时直连，按错误原因重试且不持久修改配置。
 
 **1.4.1**
 
