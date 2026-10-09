@@ -46,9 +46,11 @@ history/     已发布资产的历史快照（维护与审计使用，不向使�
 | [`git-branch-merge-flow`](skills/git-branch-merge-flow/SKILL.md) | 将当前分支按固定流程同步到目标分支：`fetch` → 对齐 `origin/*` → `push` → checkout 目标 → merge `origin/<当前>` → 推送；冲突时停在当前阶段分支 |
 | [`task-journey`](skills/task-journey/SKILL.md) | 评估长时间、多阶段任务是否需要持久状态，征得用户同意后维护可验证的里程碑计划、进度与路线调整，并支持有界子 Agent 委派、跨会话恢复、接管和自动发现探针 |
 | [`picture-formats`](skills/picture-formats/SKILL.md) | 同源并行导出 AVIF/WebP/JPEG（或 PNG），用 `<picture>` 让浏览器只下载一种；含 Vue 实践、透明兜底、Network 排错与 tinypng-mcp 素材准备 |
-| [`programming-teacher`](skills/programming-teacher/SKILL.md) | 以 HTML 课件开展长期编程课程，通过会话互动、编码练习与复习形成可验证能力，学习资料集中在项目 `.learning/` 中；课件设计参考公开的 [mattpocock/skills teach](https://github.com/mattpocock/skills/blob/main/skills/productivity/teach/SKILL.md) |
+| [`programming-teacher`](skills/programming-teacher/SKILL.md) | 调研公开项目、文章与 B 站课程，按具体知识点组织闭环大纲；以分层 HTML 集群统一大纲和详细教材，每题附折叠答案，学生笔记采用独立复习表述，阶段代码分项目目录管理 |
 | [`tune-ink-gap`](skills/tune-ink-gap/SKILL.md) | 校准设计稿中文字可见笔画到相邻元素的间距，避免将标注值直接用作 CSS `margin` |
 | [`uni-mp-analy`](skills/uni-mp-analy/SKILL.md) | 面向 Vue 2 / Vue 3 uni-app CLI 工程，内置 miniprogram-ci 依赖分析、离线 HTML 包体报告、源码优化流程与前后对比；可选微信预览验证实际打包体积 |
+
+`programming-teacher` 取用时按白名单复制 `SKILL.md`、其引用的 `references/`、`assets/lesson-example.html`、`assets/lesson-example.css` 和 `agents/openai.yaml`，保留 `policy.allow_implicit_invocation: false` 的显式调用策略。默认采用当前正文，版本与来源以 YAML `metadata` 为准；历史正文位于 `history/skills/programming-teacher/` 和重命名前的 `history/skills/programming-study-coach/`，供维护与审计使用。维护要求采用具体动作、条件、产出与完成标志表述，教材和笔记的规范集中在各自子文档。
 
 ### Rules
 
@@ -65,7 +67,7 @@ history/     已发布资产的历史快照（维护与审计使用，不向使�
 | [`tinypng-web-mcp`](mcp/tinypng-web-mcp/README.md) | 走官网 Web 后台免 Key 压缩 PNG/JPG；不稳定，仅建议学习；使用前阅读对应免责声明 |
 | [`sharp-image-mcp`](mcp/sharp-image-mcp/README.md) | 本地并行输出 JPEG/PNG/WebP/AVIF，可调画质；可生成交互式前后画质对比 HTML |
 
-功能详情与 Version Notes：Skill 见各 `SKILL.md`；Rule 见 [rules/README.md](rules/README.md)；MCP 见 [mcp/README.md](mcp/README.md)。来源 / 实现参考标注见 [AGENTS.md](AGENTS.md#实现参考标注readme--正文)。
+功能详情与版本信息：Skill 见各 `SKILL.md` 及其引用文档；Rule 见 [rules/README.md](rules/README.md)；MCP 见 [mcp/README.md](mcp/README.md)。来源 / 实现参考标注见 [AGENTS.md](AGENTS.md#实现参考标注readme--正文)。
 
 ## License
 

@@ -1,7 +1,7 @@
 interface:
   display_name: "编程老师"
-  short_description: "用 HTML 课件开展长期编程课程，会话导读与代码反馈，资料保存在 .learning"
-  default_prompt: "使用 $programming-teacher 规划长期编程课程，以 HTML 课件授课并通过会话互动与代码反馈指导学习，将课件、教学大纲、练习与参考答案、学生笔记保存在学习项目的 .learning/ 中。"
+  short_description: "调研具体知识点，以分层 HTML 集群统一大纲与详细教材，维护学生笔记，阶段代码分项目管理"
+  default_prompt: "使用 $programming-teacher 调研公开项目、文章和 B 站课程，组织知识点闭环的大纲与分层 HTML 教材，每题提供默认收起的参考答案或判断依据，维护独立可读的学生笔记，阶段代码分项目管理。"
 
 policy:
   allow_implicit_invocation: false

@@ -1,0 +1,167 @@
+<!doctype html>
+<!-- programming-teacher 5.0.0 — 已确认的课件模板，教学内容用于演示布局 -->
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>02 函数与返回值 · JavaScript 基础</title>
+  <link rel="stylesheet" href="lesson-example.css">
+</head>
+<body>
+  <a class="skip-link" href="#正文">跳转到正文</a>
+  <div class="course-nav">
+    <div class="nav-inner">
+      <div class="course-line"><strong>JavaScript 基础</strong><span>阶段一 / 02 函数与返回值</span></div>
+      <nav class="chapter-nav" aria-label="本课目录">
+        <a href="#导读" aria-current="location">导读</a>
+        <a href="#定义与调用">01 定义与调用</a>
+        <a href="#参数">02 参数</a>
+        <a href="#返回值">03 返回值</a>
+        <a href="#理解检查">04 理解检查</a>
+        <a href="#小结">05 小结与资料</a>
+      </nav>
+    </div>
+  </div>
+  <main id="正文">
+    <header id="导读">
+      <p class="eyebrow">阶段一 · 语言基础</p>
+      <h1>函数与返回值</h1>
+      <p class="lead">函数将一组操作封装为可重复调用的行为。通过参数传入数据，通过返回值取得计算结果，是组织程序逻辑的基本方式。</p>
+      <dl class="lesson-meta">
+        <div><dt>先修</dt><dd>变量、数字运算、条件判断</dd></div>
+        <div><dt>目标</dt><dd>解释调用过程，编写带返回值的函数</dd></div>
+        <div><dt>环境</dt><dd>现代浏览器的 JavaScript 控制台</dd></div>
+      </dl>
+    </header>
+
+    <section id="定义与调用" aria-labelledby="标题-定义">
+      <h2 id="标题-定义"><span class="number">01</span>从一个计算需求开始</h2>
+      <p>计算商品总价需要单价和数量。将计算过程写成函数，同一种计算就可以用于不同商品。</p>
+      <figure class="code-example">
+        <figcaption>JavaScript · 定义函数并调用</figcaption>
+        <pre><code><span class="kw">function</span> <span class="fn">calculateTotal</span>(price, quantity) {
+  <span class="kw">return</span> price * quantity;
+}
+
+<span class="kw">const</span> total = <span class="fn">calculateTotal</span>(<span class="num">20</span>, <span class="num">3</span>);
+console.log(total); <span class="comment">// 60</span></code></pre>
+      </figure>
+      <p><code>function</code> 声明函数，<code>calculateTotal</code> 是函数名。圆括号声明输入参数，大括号包含调用时执行的语句。</p>
+      <ol>
+        <li>声明函数时建立函数定义。</li>
+        <li>执行 <code>calculateTotal(20, 3)</code> 时，将输入传入函数并执行函数体。</li>
+        <li><code>return</code> 将计算得到的 <code>60</code> 返回给调用处，再赋给变量 <code>total</code>。</li>
+      </ol>
+      <p class="note"><strong>定义与执行：</strong>函数声明保存行为；函数调用才执行函数体。同一函数可以用不同输入多次调用。</p>
+    </section>
+
+    <section id="参数" aria-labelledby="标题-参数">
+      <h2 id="标题-参数"><span class="number">02</span>参数如何进入函数</h2>
+      <p>声明中的 <code>price</code> 和 <code>quantity</code> 是形参，调用中的 <code>20</code> 和 <code>3</code> 是实参。普通位置参数按照出现顺序对应。</p>
+      <div class="table-wrap">
+        <table>
+          <caption>calculateTotal(20, 3) 的参数对应关系</caption>
+          <thead><tr><th scope="col">位置</th><th scope="col">形参</th><th scope="col">本次调用的值</th><th scope="col">含义</th></tr></thead>
+          <tbody><tr><td>第一个</td><td><code>price</code></td><td><code>20</code></td><td>单价</td></tr><tr><td>第二个</td><td><code>quantity</code></td><td><code>3</code></td><td>数量</td></tr></tbody>
+        </table>
+      </div>
+      <h3 id="缺少参数">缺少参数时的结果</h3>
+      <figure class="code-example">
+        <figcaption>JavaScript · 观察缺少输入的调用</figcaption>
+        <pre><code>console.log(<span class="fn">calculateTotal</span>(<span class="num">20</span>)); <span class="comment">// NaN</span></code></pre>
+      </figure>
+      <p>本例没有传入数量，<code>quantity</code> 的值是 <code>undefined</code>。数字与 <code>undefined</code> 相乘得到 <code>NaN</code>，表示此次数值计算未得到有效数字。此函数约定调用方提供两个有效数字。</p>
+    </section>
+
+    <section id="返回值" aria-labelledby="标题-返回值">
+      <h2 id="标题-返回值"><span class="number">03</span>返回结果与打印结果</h2>
+      <p><code>return</code> 把值交给调用方，并结束本次函数执行；<code>console.log</code> 把信息显示在控制台。打印出的内容与函数返回值是两个不同的结果。</p>
+      <figure class="code-example">
+        <figcaption>JavaScript · 比较打印与返回</figcaption>
+        <pre><code><span class="kw">function</span> <span class="fn">showTotal</span>(price, quantity) {
+  console.log(price * quantity);
+}
+
+<span class="kw">const</span> result = <span class="fn">showTotal</span>(<span class="num">20</span>, <span class="num">3</span>); <span class="comment">// 打印 60</span>
+console.log(result); <span class="comment">// 打印 undefined</span></code></pre>
+      </figure>
+      <p><code>showTotal</code> 执行后打印 <code>60</code>，但没有显式返回结果，调用得到的返回值是 <code>undefined</code>。需要继续计算时，应使用返回数值的 <code>calculateTotal</code>。</p>
+      <h3 id="提前返回">提前返回可以处理特殊条件</h3>
+      <figure class="code-example">
+        <figcaption>JavaScript · 数量为零时直接返回</figcaption>
+        <pre><code><span class="kw">function</span> <span class="fn">calculateTotal</span>(price, quantity) {
+  <span class="kw">if</span> (quantity === <span class="num">0</span>) {
+    <span class="kw">return</span> <span class="num">0</span>;
+  }
+  <span class="kw">return</span> price * quantity;
+}</code></pre>
+      </figure>
+      <p>数量为零时，第一个 <code>return</code> 结束调用，后面的乘法不会执行。其他输入继续执行最后一行。</p>
+    </section>
+
+    <section id="理解检查" aria-labelledby="标题-检查">
+      <h2 id="标题-检查"><span class="number">04</span>理解检查</h2>
+      <div class="check" id="检查-预测">
+        <h3>问题一 · 预测结果</h3>
+        <p><code>const amount = calculateTotal(12, 4);</code> 执行后，<code>amount</code> 是什么？计算过程中，两个实参分别对应哪个形参？</p>
+        <p class="prompt">请先作答，再展开参考答案对照。</p>
+        <details><summary>展开参考答案</summary><p><code>amount</code> 是 <code>48</code>。实参 <code>12</code> 对应 <code>price</code>，实参 <code>4</code> 对应 <code>quantity</code>，函数将乘积返回给调用方。</p></details>
+      </div>
+      <div class="check" id="检查-返回">
+        <h3>问题二 · 解释行为</h3>
+        <p><code>showTotal</code> 已经打印了总价，为什么赋值给 <code>result</code> 后仍得到 <code>undefined</code>？应如何让调用方取得总价？</p>
+        <p class="prompt">请先作答，再展开参考答案对照。</p>
+        <details><summary>展开参考答案</summary><p>打印只产生控制台输出。函数没有显式返回总价，因此调用结果是 <code>undefined</code>。将函数体改为 <code>return price * quantity;</code>，调用方即可取得并继续使用这个数值。</p></details>
+      </div>
+      <div class="check" id="检查-边界">
+        <h3>问题三 · 追踪执行路径</h3>
+        <p>在“提前返回”的版本中，调用 <code>calculateTotal(20, 0)</code> 时执行了哪个 <code>return</code>？最后一行会执行吗？</p>
+        <p class="prompt">请先作答，再展开参考答案对照。</p>
+        <details><summary>展开参考答案</summary><p>条件 <code>quantity === 0</code> 成立，执行分支内的 <code>return 0;</code>，返回 <code>0</code> 并结束调用。最后一行不会执行。</p></details>
+      </div>
+    </section>
+
+    <section id="小结" aria-labelledby="标题-小结">
+      <h2 id="标题-小结"><span class="number">05</span>小结与资料</h2>
+      <ul>
+        <li><strong>定义：</strong>用函数名、参数和函数体描述可重复执行的行为。</li>
+        <li><strong>调用：</strong>实参按位置传入，本次调用执行函数体。</li>
+        <li><strong>返回：</strong><code>return</code> 提供调用结果并结束执行；控制台打印用于观察。</li>
+      </ul>
+      <p>延伸阅读：<a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Functions">MDN 中文文档：函数</a>，重点阅读“函数声明”和“调用函数”，对照函数输入、执行过程与返回结果。</p>
+    </section>
+    <footer>课件模板示例 · 原生 HTML / CSS · 顶部目录在各类屏幕上保持可见</footer>
+  </main>
+  <script>
+    // programming-teacher 5.0.0 — 目录高亮只反映阅读位置。
+    const links = Array.from(document.querySelectorAll('.chapter-nav a'));
+    const targets = links.map(function (link) {
+      return document.getElementById(decodeURIComponent(link.hash.slice(1)));
+    });
+    let scheduled = false;
+    function updateNavigation() {
+      let current = 0;
+      const offset = document.querySelector('.course-nav').offsetHeight + 35;
+      targets.forEach(function (target, index) {
+        if (target.getBoundingClientRect().top <= offset) current = index;
+      });
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) {
+        current = links.length - 1;
+      }
+      links.forEach(function (link, index) {
+        if (index === current) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+      scheduled = false;
+    }
+    window.addEventListener('scroll', function () {
+      if (!scheduled) {
+        scheduled = true;
+        window.requestAnimationFrame(updateNavigation);
+      }
+    }, { passive: true });
+    window.addEventListener('resize', updateNavigation);
+    updateNavigation();
+  </script>
+</body>
+</html>
