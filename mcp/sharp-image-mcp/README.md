@@ -1,9 +1,10 @@
 ---
-name: sharp-image-mcp
-description: Local parallel image optimization MCP with multiple output formats, quality control and optional visual comparison report.
-x-mcp-version: 1.0.0
-x-source-repo: JUST-Limbo/limbo-ai-toolkit
-x-source-path: mcp/sharp-image-mcp
+name: "sharp-image-mcp"
+description: "Local parallel image optimization MCP with multiple output formats, quality control and optional visual comparison report."
+metadata:
+  x-mcp-version: "1.0.0"
+  x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
+  x-source-path: "mcp/sharp-image-mcp"
 ---
 
 # sharp-image-mcp

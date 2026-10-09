@@ -47,7 +47,9 @@
 
 - **本仓库原创**：`x-source-repo` 填本仓库（当前为 `JUST-Limbo/limbo-ai-toolkit`）；`x-source-path` 填该资产在本仓库中的路径。
 - **从其它仓库迁入或 fork**：`x-source-repo` 填**上游**仓库；`x-source-path` 填上游中的对应路径；同步后更新 `x-source-version`。
-- Skill 的自定义治理字段写在 `SKILL.md` YAML 头的 `metadata` 下，避免使用官方校验器不接受的顶层扩展字段；Rule / MCP / Agent / 命令等写在文件 frontmatter，或无 frontmatter 时在正文开头用等价 YAML 块标注。
+- 对外资产的所有 `x-*` 治理字段统一放在 YAML 头的 `metadata` 下；资产自身字段保留顶层。无 frontmatter 的资产在说明文件开头用等价 YAML 块标注。
+- YAML 治理字段的字符串统一使用双引号，布尔值不加引号，长 description 使用 `>-`；`metadata` 内依次排列资产版本、来源仓库、来源路径、来源版本、来源 URL。保留 `x-skill-version` / `x-rule-version` / `x-mcp-version` 等类型版本字段。
+- 当前资产正文不添加文末来源注释，来源信息仅在 YAML 中维护；已发布历史快照保持原样。源文件格式不代表任何客户端的加载格式。
 
 示例（本仓库原创 Skill）：
 
@@ -101,7 +103,7 @@ Skill 的版本治理、改码注释、旧版本痕迹处理等细则见下文�
 
 - 放进对应顶层目录（`rules/`、`mcp/`、`agents/`、`commands/`），目录尚不存在时新建。
 - 同样要带清晰的中文说明、**来源仓库标注**（见上文），并在根 `README.md` 对应类型表格（Skills / Rules / MCP）中补一行。
-- Rule 的 `.md` 正文末尾加 HTML 来源注释（`<!-- x-source-repo` / `x-source-path` / `x-rule-version` / `x-source-url -->`），取用方去掉 frontmatter 复制后仍能对照上游更新；各 Rule 的功能说明与 Version Notes 写在 `rules/README.md`，通用取用方式见 [rules/README.md](rules/README.md#取用方式)。
+- Rule 的来源与版本统一在 YAML `metadata` 中维护；功能说明与 Version Notes 写在 `rules/README.md`，通用取用方式见 [rules/README.md](rules/README.md#取用方式)。
 - Rule 的版本治理、取用同步、冲突优先级等细则见下文「Rule：创建、维护与调用」。
 
 ---
@@ -231,9 +233,9 @@ metadata:
 
 **`rules/<name>.md`（可复制的规则正文）**
 
-- YAML 头：`name`、英文 `description`（便于工具检索）、`x-rule-version`（语义化版本，从 `1.0.0` 起）、**`x-source-repo`**（及按需的 `x-source-path`、`x-source-version`）、`scope`（如 `global`，或注明文件 glob 作用域）。
+- YAML 头顶层保留 `name`、英文 `description` 与 `scope`；`metadata` 包含 `x-rule-version`、`x-source-repo` 及按需的来源路径、来源版本和来源 URL。
 - 正文从 `# 标题` 起为**可直接复制**的约束条文；**不要**在正文中间写功能说明、取用教程、版本历史——避免被取用方误当作约束加载。
-- 正文末尾加 HTML 来源注释（`<!-- x-source-repo` / `x-source-path` / `x-rule-version` / `x-source-url -->`），取用方去掉 frontmatter 后仍能对照上游更新。
+- 正文不添加来源注释，治理信息仅保留在 YAML `metadata` 中。
 
 **`rules/README.md`（规则目录与条目说明）**
 
@@ -249,14 +251,14 @@ metadata:
 
 - 每条 Rule **必须**带有**版本号**，推荐语义化版本 `主版本.次版本.修订号`（例如 `1.0.0`）。
 - **每一个**曾发布过的版本都要**完整保留**一份可读的 Rule 正文（建议与当时 `rules/<name>.md` 内容一致），便于对照与审计。
-- **默认取用规则**：用户未指定版本时，Agent **必须**以该 Rule 的**最新版本**为准（即当前 `rules/<name>.md` 与 frontmatter / 文末注释中的 `x-rule-version`）。
+- **默认取用规则**：用户未指定版本时，Agent **必须**以该 Rule 的**最新版本**为准（即当前 `rules/<name>.md` 与 frontmatter 的 `metadata.x-rule-version`）。
 
 #### 2.0 版本号只在「发布点」进位（重要）
 
 「已发布」指该版本**已通过 git 提交**（进入版本历史）。仅存在于工作区、尚未提交的改动**不算**已发布。
 
 - **同一次迭代只维护一个未提交版本**：在同一轮打磨里连续多次修改同一条 Rule（哪怕跨多轮对话），只要**尚未提交**，就**始终复用同一个版本号**，持续在该版本上修改，**不要**每改一次就升一个号。
-- **到发布点才定版本 + 留快照**：当一轮迭代收敛、准备 `git commit` 时，才确定最终版本号，并在 `history/rules/<name>/<版本号>.md` 建**一份**快照；同步更新 frontmatter、`rules/README.md` 的 Version Notes 与文末 HTML 注释中的 `x-rule-version`。发布点之前**不**创建中间快照。
+- **到发布点才定版本 + 留快照**：当一轮迭代收敛、准备 `git commit` 时，才确定最终版本号，并在 `history/rules/<name>/<版本号>.md` 建**一份**快照；同步更新 `metadata.x-rule-version` 与 `rules/README.md` 的 Version Notes。发布点之前**不**创建中间快照。
 - **禁止把过程当发布**：不得因为「用户又让改了一次」就自动升版本号、建新快照；这会制造 `1.2.0→1.2.1→1.3.0…` 一串未发布的噪音版本。
 - **误建的中间版本应合并**：若已产生多个未提交的中间版本号/快照，应在提交前**合并为一个**干净版本（删除多余快照），只保留真正发布的那一个。
 
@@ -264,28 +266,21 @@ metadata:
 
 当前生效的对外 Rule 统一放在 `rules/` 下，每条 Rule 一个 `.md` 文件；历史快照集中放在顶层 `history/`：
 
-- `rules/<name>.md`：**始终**对应该 Rule 的**最新版本**全文（含 frontmatter、可复制正文与文末来源注释）。
+- `rules/<name>.md`：**始终**对应该 Rule 的**最新版本**全文（含 frontmatter 与可复制正文）。
 - `history/rules/<name>/<版本号>.md`：该版本的**完整快照**；发布新版本时**新增**文件，**不要**覆盖旧版本快照。
 - `rules/README.md`：规则清单、各 Rule 的功能说明与 Version Notes；新增 / 删除 / 重命名 Rule 时同步更新。
 
-在 frontmatter 中增加版本字段 `x-rule-version`，例如：
+在 frontmatter 的 `metadata` 中记录治理字段，例如：
 
 ```yaml
-name: agent-global-baseline
-description: Global always-on baseline rules for AI agents
-x-rule-version: 1.0.0
-x-source-repo: JUST-Limbo/limbo-ai-toolkit
-x-source-path: rules/agent-global-baseline.md
-scope: global
-```
-
-正文末尾 HTML 注释示例（`x-rule-version` 须与 frontmatter 一致）：
-
-```html
-<!-- x-source-repo: JUST-Limbo/limbo-ai-toolkit
-     x-source-path: rules/agent-global-baseline.md
-     x-rule-version: 1.0.0
-     x-source-url: https://github.com/JUST-Limbo/limbo-ai-toolkit/blob/main/rules/agent-global-baseline.md -->
+name: "agent-global-baseline"
+description: "Global always-on baseline rules for AI agents"
+scope: "global"
+metadata:
+  x-rule-version: "1.5.1"
+  x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
+  x-source-path: "rules/agent-global-baseline.md"
+  x-source-url: "https://github.com/JUST-Limbo/limbo-ai-toolkit/blob/main/rules/agent-global-baseline.md"
 ```
 
 > 用 `x-` 前缀表明这是本仓库自定义的扩展字段：各 AI 工具未必解析它们，仅供本仓库治理与取用方对照上游使用。
@@ -299,7 +294,7 @@ scope: global
 
 ### 4. 取用方仓库中存在旧版本 Rule 痕迹时的处理
 
-若在目标仓库准备**更新或合并**某条 Rule，且本地已存在该 Rule（例如文末 HTML 注释或 frontmatter 中有**旧** `x-rule-version`），而即将写入的是**新版本**：
+若在目标仓库准备**更新或合并**某条 Rule，且本地已存在该 Rule（例如 YAML `metadata`、旧版文末注释或取用记录中有**旧** `x-rule-version`），而即将写入的是**新版本**：
 
 1. Agent **必须先提示**用户：此处存在**旧版本 Rule**，并简要指出依据（例如注释中的旧版本号、文件名）。
 2. Agent **必须询问**用户：本次应**保留本地改动**、**整文件替换为上游最新**，还是**人工 diff 后再合并**。

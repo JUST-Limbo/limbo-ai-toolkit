@@ -1,9 +1,10 @@
 ---
-name: tinypng-mcp
-description: MCP server for compressing images via TinyPNG official API
-x-mcp-version: 3.0.0
-x-source-repo: JUST-Limbo/limbo-ai-toolkit
-x-source-path: mcp/tinypng-mcp
+name: "tinypng-mcp"
+description: "MCP server for compressing images via TinyPNG official API"
+metadata:
+  x-mcp-version: "3.0.0"
+  x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
+  x-source-path: "mcp/tinypng-mcp"
 ---
 
 # tinypng-mcp

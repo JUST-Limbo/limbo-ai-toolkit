@@ -1,9 +1,10 @@
 ---
-name: tinypng-web-mcp
-description: MCP server for compressing PNG/JPG via TinyPNG web backend without API key
-x-mcp-version: 2.0.0
-x-source-repo: JUST-Limbo/limbo-ai-toolkit
-x-source-path: mcp/tinypng-web-mcp
+name: "tinypng-web-mcp"
+description: "MCP server for compressing PNG/JPG via TinyPNG web backend without API key"
+metadata:
+  x-mcp-version: "2.0.0"
+  x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
+  x-source-path: "mcp/tinypng-web-mcp"
 ---
 
 # tinypng-web-mcp

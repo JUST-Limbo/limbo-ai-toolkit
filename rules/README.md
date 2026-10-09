@@ -6,7 +6,7 @@
 
 从 [`rules/<name>.md`](.) 复制到目标项目或用户级配置：
 
-1. 复制正文（**去掉**本仓库治理用 YAML frontmatter），**保留**文末 `<!-- x-source-* -->` 注释。
+1. 复制正文（**去掉**本仓库治理用 YAML frontmatter）；源文件的来源与版本统一保存在 YAML `metadata`，正文不含来源注释。
 2. 按目标工具补写必要的 frontmatter（如 Cursor 的 `alwaysApply`、`globs`）。
 3. **不要**把本 README 里的功能说明、Version Notes 抄进规则正文。
 
@@ -30,7 +30,7 @@ alwaysApply: true
 ---
 ```
 
-**对照更新**：读取本地规则文末注释中的 `x-source-url`（或 `x-source-repo` + `x-source-path`），与上游 diff；本地 `x-rule-version` 低于上游时再合并更新。
+**对照更新**：依据取用时保留的来源与版本记录，与上游 YAML `metadata` 及正文对照；旧版文末注释仍可用于识别来源。复制纯正文会丢失治理信息，取用方需另行保留记录；记录格式与工具适配流程本轮不调整。
 
 与专题 Rule 冲突时，以**更具体**的目录/项目 Rule 为准（详见 [AGENTS.md §5](../AGENTS.md#5-加载优先级与冲突)）。
 
@@ -45,7 +45,7 @@ alwaysApply: true
 
 ### `agent-global-baseline`
 
-- 版本：见文件内 `x-rule-version` 与文末来源注释
+- 版本：见源文件 YAML 的 `metadata.x-rule-version`
 - 作用域：**全局**（始终加载，不绑定文件 glob）
 
 #### 功能说明
@@ -70,6 +70,10 @@ alwaysApply: true
 规则正文：[`agent-global-baseline.md`](agent-global-baseline.md)。复制、frontmatter 调整、对照上游更新见上文 [取用方式](#取用方式)。
 
 #### Version Notes
+
+**1.5.1**
+
+- 治理字段统一迁入 YAML metadata，来源 URL 移入头部，删除文末来源注释；规则行为不变。
 
 **1.5.0**
 
@@ -107,7 +111,7 @@ alwaysApply: true
 
 ### `style-reference-clarify`
 
-- 版本：见文件内 `x-rule-version` 与文末来源注释
+- 版本：见源文件 YAML 的 `metadata.x-rule-version`
 - 作用域：**全局**（始终加载，不绑定文件 glob）
 
 #### 功能说明
@@ -133,6 +137,10 @@ alwaysApply: true
 取用到 Cursor 时建议 `alwaysApply: true`，以便自然语言触发时也能拦住「先改后问」。
 
 #### Version Notes
+
+**1.0.1**
+
+- 治理字段统一迁入 YAML metadata，来源 URL 移入头部，删除文末来源注释；规则行为不变。
 
 **1.0.0**
 
