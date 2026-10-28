@@ -2,12 +2,12 @@
 name: git-branch-merge-flow
 description: On current branch guards that source != target, fetches origin first, commits if needed, aligns local current with origin/current if behind, pushes current; then checks out target, fetches, aligns with origin/target if behind, merges origin/current into target, pushes target, and switches back on success. Stays on the branch where conflict occurs without pushing target on failure.
 metadata:
-  x-skill-version: "1.5.2"
+  x-skill-version: "1.5.3"
   x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
   x-source-path: "skills/git-branch-merge-flow"
 ---
 
-# Git Branch Merge Flow
+# Git 分支合并流程
 
 ## 功能与用法（中文说明）
 
@@ -93,7 +93,7 @@ flowchart TD
 | 8 | `TargetBranch` | `git merge origin/CurrentBranch` | **始终**以远端跟踪分支为合并来源 | 冲突则停止在 `TargetBranch`，不推送、不切回 |
 | 9 | `TargetBranch` | `git push -u origin TargetBranch` | 推送合并后的目标分支 | 停止在 `TargetBranch` |
 | 10 | `CurrentBranch` | `git checkout CurrentBranch` | 切回来源分支 | — |
-| 11 | — | 汇报 | 按「Output Requirements」输出 | — |
+| 11 | — | 汇报 | 按「输出要求」输出 | — |
 
 #### 为什么第一步就 fetch（不必等 commit）
 
@@ -106,7 +106,7 @@ flowchart TD
 - **阶段一 fetch**：为在 push 前对齐本地 `CurrentBranch` 与 `origin/CurrentBranch`（否则 push 可能被拒或漏合并）。
 - **push 成功会自动更新本地 `origin/CurrentBranch`**，所以阶段一 push 后**无需**再 fetch 来刷新当前分支的远端引用。
 - **阶段二 fetch**：真正价值是拿到最新的 `origin/TargetBranch`。放在 `checkout TargetBranch` 之后、对齐之前，使目标分支远端引用的陈旧窗口最小。
-- 注意：阶段二的全量 fetch 也会刷新 `origin/CurrentBranch`；若此刻有他人向当前分支推送了新提交，第 8 步合并的将是**最新的** `origin/CurrentBranch`（latest wins），这是可接受且通常期望的行为。
+- 注意：阶段二的全量 fetch 也会刷新 `origin/CurrentBranch`；若此刻有他人向当前分支推送了新提交，第 8 步合并的将是**最新的** `origin/CurrentBranch`（以刷新后的远端为准），这是可接受且通常期望的行为。
 
 #### 分支与引用关系
 
@@ -216,56 +216,24 @@ TargetBranch 阶段冲突（对齐 origin/TargetBranch 或 merge origin/CurrentB
 - **禁止**使用 `git pull` 代替显式 `git fetch` + `git merge`。
 - 在 **TargetBranch** 上执行 `git merge origin/<CurrentBranch>`，**不要**执行 `git merge <CurrentBranch>`（本地分支）。
 
-## Instructions
+## 命令流程（Windows PowerShell）
 
-Follow the **完整流程** section above. When the user provides the **目标分支** (target branch) name, often via `/git-branch-merge-flow 合并到<目标分支>`:
-
-**Phase 1 — on `CurrentBranch`**
-
-1. Capture **当前分支** as `CurrentBranch`. **If `CurrentBranch` equals `TargetBranch`, stop immediately** (nothing to merge).
-2. Run `git fetch origin` **first** (safe with uncommitted changes; only updates `origin/*`). **Stop immediately if fetch fails.**
-3. Commit pending changes (if any), with a Chinese message reflecting real file-level changes.
-4. Align local `CurrentBranch` with `origin/<CurrentBranch>` when applicable:
-   - If `origin/<CurrentBranch>` does not exist, skip alignment (e.g. brand-new branch).
-   - If local is behind `origin/<CurrentBranch>`, run `git merge origin/<CurrentBranch>`.
-   - If local is up to date or ahead, skip.
-   - If alignment conflicts, **stop on `CurrentBranch`**; do not checkout target.
-5. Push `CurrentBranch` to `origin`. **Stop immediately if push fails.** (A successful push updates the local `origin/<CurrentBranch>` ref automatically; no extra fetch needed here.)
-
-**Phase 2 — on `TargetBranch`**
-
-6. Switch to `TargetBranch`. **Stop immediately if checkout fails.**
-7. Run `git fetch origin` (refreshes `origin/*`, primarily to get the latest `origin/<TargetBranch>`). **Stop immediately if fetch fails.** Then align local `TargetBranch` with `origin/<TargetBranch>` when applicable (same rules as step 4).
-   - If alignment conflicts, stop on `TargetBranch`; do not push; do not switch back.
-8. Merge **`origin/<CurrentBranch>`** into `TargetBranch`. **Do not** merge local `CurrentBranch`.
-9. If merge conflicts at any merge step on `TargetBranch`:
-   - Stop immediately on `TargetBranch`.
-   - Report conflict phase and conflict files.
-   - Do not switch back to `CurrentBranch`.
-   - Do not push `TargetBranch`.
-10. If all steps succeed:
-    - Push `TargetBranch`. **Stop immediately if push fails.**
-    - Switch back to `CurrentBranch`.
-    - Report success including both alignment phases and merge details.
-
-## Command Workflow (Windows PowerShell)
-
-Use this exact command sequence; only replace the target branch placeholder:
+严格按照以下命令顺序执行，仅替换目标分支占位符：
 
 ```powershell
-# Only the target branch is required input. Current branch is detected automatically.
+# 只需输入目标分支，当前分支自动识别。
 $TargetBranch = "target-branch-name"
 
 $CurrentBranch = git rev-parse --abbrev-ref HEAD
 $OriginCurrentRef = "origin/$CurrentBranch"
 
-# Guard: source and target must differ
+# 校验：来源分支与目标分支必须不同。
 if ($CurrentBranch -eq $TargetBranch) {
   Write-Host "CurrentBranch 与 TargetBranch 相同（$CurrentBranch），无需合并。停止。"
   exit 1
 }
 
-# Detect repository identifier dynamically for final report.
+# 动态识别仓库标识，用于最终汇报。
 $OriginUrl = git remote get-url origin 2>$null
 $RepoIdentifier = ""
 if ($LASTEXITCODE -eq 0 -and $OriginUrl) {
@@ -282,9 +250,9 @@ if (-not $RepoIdentifier) {
 
 $ConflictPhase = ""
 
-# Shared helper: align the currently checked-out $Branch with origin/$Branch when behind.
-# Reports back through $script:AlignStatus (none|merged|skipped) and $script:AlignDetail.
-# On merge conflict, sets $script:ConflictPhase = $ConflictLabel and exits 1 (stays on $Branch).
+# 共享函数：当前检出的 $Branch 落后于 origin/$Branch 时执行对齐。
+# 通过 $script:AlignStatus（none / merged / skipped）与 $script:AlignDetail 返回结果。
+# 合并冲突时设置 $script:ConflictPhase = $ConflictLabel，以退出码 1 停止并留在 $Branch。
 function Invoke-AlignWithRemote {
   param(
     [Parameter(Mandatory = $true)][string]$Branch,
@@ -305,7 +273,7 @@ function Invoke-AlignWithRemote {
     git merge $remoteRef
     if ($LASTEXITCODE -ne 0) {
       $script:ConflictPhase = $ConflictLabel
-      Write-Host "Merge conflict while aligning $Branch with $remoteRef. Stay on $Branch and stop."
+      Write-Host "对齐 $Branch 与 $remoteRef 时发生合并冲突，留在 $Branch 并停止。"
       exit 1
     }
     $script:AlignStatus = "merged"
@@ -320,9 +288,9 @@ function Invoke-AlignWithRemote {
   }
 }
 
-# --- Phase 1: CurrentBranch — fetch, commit, align, push ---
+# 阶段一：CurrentBranch — fetch、提交、对齐、推送。
 
-# First fetch (before commit; safe with uncommitted changes)
+# 第一次 fetch：在提交前执行，不影响未提交改动。
 git fetch origin
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
@@ -345,14 +313,14 @@ $CurrentAlignDetail = $AlignDetail
 
 git push -u origin $CurrentBranch
 if ($LASTEXITCODE -ne 0) { exit 1 }
-# A successful push updates local origin/$CurrentBranch automatically; no extra fetch needed.
+# 推送成功后本地 origin/$CurrentBranch 自动更新，无需额外 fetch。
 
-# --- Phase 2: TargetBranch — checkout, fetch, align, merge origin/CurrentBranch, push ---
+# 阶段二：TargetBranch — 切换、fetch、对齐、合并 origin/CurrentBranch、推送。
 
 git checkout $TargetBranch
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
-# Fetch here, right before using origin/$TargetBranch (smallest staleness window).
+# 在使用 origin/$TargetBranch 前就近 fetch，尽量缩短远端引用的陈旧窗口。
 git fetch origin
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
@@ -360,17 +328,17 @@ Invoke-AlignWithRemote -Branch $TargetBranch -ConflictLabel "align-origin-target
 $TargetAligned = $AlignStatus
 $TargetAlignDetail = $AlignDetail
 
-# Record SHAs for the final report (after fetch/align, before merge)
+# 在 fetch 和对齐之后、合并之前记录 SHA，用于最终汇报。
 $OriginCurrentSha = git rev-parse --short $OriginCurrentRef
 $OriginTargetSha = ""
 git rev-parse "origin/$TargetBranch" 2>$null
 if ($LASTEXITCODE -eq 0) { $OriginTargetSha = git rev-parse --short "origin/$TargetBranch" }
 
-# Merge origin/CurrentBranch into target (NOT local CurrentBranch)
+# 将 origin/CurrentBranch 合入目标分支，不合并本地 CurrentBranch。
 git merge $OriginCurrentRef
 if ($LASTEXITCODE -ne 0) {
   $ConflictPhase = "merge-origin-current"
-  Write-Host "Merge conflict while merging $OriginCurrentRef into $TargetBranch. Stay on $TargetBranch and stop."
+  Write-Host "将 $OriginCurrentRef 合入 $TargetBranch 时发生冲突，留在 $TargetBranch 并停止。"
   exit 1
 }
 
@@ -378,26 +346,26 @@ git push -u origin $TargetBranch
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
 git checkout $CurrentBranch
-Write-Host "Done: guarded, aligned $CurrentBranch ($CurrentAligned), pushed, checked out $TargetBranch & fetched, aligned ($TargetAligned), merged $OriginCurrentRef, pushed $TargetBranch, switched back to $CurrentBranch."
+Write-Host "完成：已校验来源与目标不同；已对齐 $CurrentBranch（$CurrentAligned）并推送；已切换到 $TargetBranch，执行 fetch、对齐（$TargetAligned）、合并 $OriginCurrentRef 并推送；已切回 $CurrentBranch。"
 Write-Host "涉及仓库：$RepoIdentifier"
 ```
 
-## Output Requirements
+## 输出要求
 
-Always report:
+每次均须汇报：
 
-- detected **当前分支** and **目标分支** names (and that they differ)
-- whether the current branch had a new commit before align
-- **CurrentBranch** alignment status (`none` / `merged` / `skipped`) with detail
-- push status for **CurrentBranch**
-- fetch status (phase 1 on current, phase 2 on target)
-- `origin/<CurrentBranch>` ref and short SHA used as merge source
-- **TargetBranch** alignment status (`none` / `merged` / `skipped`) with detail
-- feature-branch merge status (source: `origin/<CurrentBranch>`)
-- final branch after workflow
-- involved repository line: `涉及仓库：\`<repo-identifier>\``
+- 识别出的**当前分支**与**目标分支**名称，以及二者不同的校验结果
+- 当前分支在对齐前是否产生新提交
+- **CurrentBranch** 的对齐状态（`none` / `merged` / `skipped`）及详情
+- **CurrentBranch** 的推送状态
+- fetch 状态（阶段一在当前分支，阶段二在目标分支）
+- 实际作为合并来源的 `origin/<CurrentBranch>` 引用及短 SHA
+- **TargetBranch** 的对齐状态（`none` / `merged` / `skipped`）及详情
+- 功能分支合并状态（来源：`origin/<CurrentBranch>`）
+- 流程结束后的所在分支
+- 涉及仓库一行： `涉及仓库：\`<repo-identifier>\``
 
-Success case should follow this style:
+成功时按以下样式汇报：
 
 ```text
 已按 /git-branch-merge-flow 合并到<目标分支> 执行完成，结果如下：
@@ -427,24 +395,25 @@ Success case should follow this style:
 - 已切回 `<current-branch>` 分支
 ```
 
-Conflict case report must explicitly state:
+发生冲突时，汇报必须明确说明：
 
-- **stopped branch** (`CurrentBranch` or `TargetBranch`)
-- if stopped on `TargetBranch`: did not switch back to `CurrentBranch`, did not push `TargetBranch`
-- if stopped on `CurrentBranch`: did not checkout `TargetBranch`
+- **停留分支**（`CurrentBranch` 或 `TargetBranch`）
+- 若停留在 `TargetBranch`：未切回 `CurrentBranch`，未推送 `TargetBranch`
+- 若停留在 `CurrentBranch`：未切换到 `TargetBranch`
 - **冲突阶段**：`align-origin-current` / `align-origin-target` / `merge-origin-current`
 - **冲突文件**：`<list>`
 
-## Version Notes
+## 版本说明
 
-- Current effective version: `1.5.2`
-- Default behavior when user does not specify version: use this latest `SKILL.md`.
-- Historical snapshots should be kept under `history/skills/git-branch-merge-flow/<version>.md` at the repository root; do not place snapshots inside the distributable Skill directory or name them `SKILL.md`.
+- 当前生效版本： `1.5.3`
+- 用户未指定版本时，默认使用当前最新的 `SKILL.md`。
+- 历史快照应保存在仓库根目录的 `history/skills/git-branch-merge-flow/<version>.md`；不要放入可分发的 Skill 目录，也不要命名为 `SKILL.md`。
+- `1.5.3`: 删除重复的英文执行说明，其余英文说明、注释和提示改为中文；保留原有结构、流程图、命令逻辑与输出模板。
 - `1.5.2`: 将版本与来源治理字段迁入 `metadata`，兼容官方 SKILL.md 校验器；执行流程未变化。
 - `1.5.1`: 历史快照迁移到仓库顶层 `history/`，并改用 `<version>.md` 文件名，避免使用侧复制 Skill 时携带历史版本或将其误识别为可安装 Skill。
 - `1.5.0`: 相对 `1.4.0` 的整体升级——合并来源改为 `origin/<CurrentBranch>`（非本地分支）；`CurrentBranch` 与 `TargetBranch` 落后各自 `origin/*` 时统一对齐；`CurrentBranch` 采用「先 fetch 再 commit」顺序，push 后不再重复 fetch，第二次 fetch 放在阶段二切到目标分支之后；新增 `CurrentBranch != TargetBranch` 守卫；对齐逻辑抽取为共享函数 `Invoke-AlignWithRemote`；补全流程图与分步表。
 
-## Example Prompt
+## 提示语示例
 
 ```text
 /git-branch-merge-flow 合并到<目标分支>
