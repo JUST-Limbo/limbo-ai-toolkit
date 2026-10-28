@@ -2,7 +2,7 @@
 name: uni-mp-analy
 description: Analyze and optimize WeChat mini-program package size for Vue 2 and Vue 3 uni-app CLI projects. Build production artifacts, collect miniprogram-ci dependency and quality data, generate an offline HTML treemap report, and verify source-level optimizations with before/after measurements. Use for main-package bloat, subpackage planning, dependency attribution, or package-size audits; excludes HBuilderX-managed projects and other mini-program platforms.
 metadata:
-  x-skill-version: "2.0.1"
+  x-skill-version: "2.1.0"
   x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
   x-source-path: "skills/uni-mp-analy"
 ---
@@ -12,6 +12,8 @@ metadata:
 ## 功能说明
 
 面向 **Vue 2 / Vue CLI / Webpack** 和 **Vue 3 / Vite** 的 uni-app CLI 工程，调用 `miniprogram-ci` 采集编译产物的依赖、包归属和质量检查，生成离线 HTML 报告，并在用户授权后实施、复测源码优化。
+
+报告内置开发者工具代码包分析视图，支持文件导航、矩形树图和模块依赖图。保留原版小节点隐藏与大小分摊规则；原始测量值以 `analysis.json` 为准。离线操作及数据口径见 [执行与数据协议](references/runtime.md#离线代码包分析视图)。
 
 `miniprogram-ci` 是 Skill `scripts/` 内的锁定依赖，不安装进业务工程，也不需要全局 CLI、MCP 或微信开发者工具 GUI。
 
@@ -57,7 +59,7 @@ node <skill>/scripts/analyze.mjs --root <工程根目录> --output <新报告目
 
 需要制定或实施优化时阅读 [优化决策](references/optimization.md)。每项建议至少给出产物路径、引用证据、对应源码位置、预计影响和验证方法。估算与实测分开写，不能把重复字节或未关联字节直接当成可节省体积。
 
-遵循用户授权改动源码，一次聚焦一组可验证的变化。对被修改代码留下简短 `uni-mp-analy 2.0.1` 注释，沿用语言原生注释格式；严格 JSON 不插入非法注释，可在相邻被改动的脚本标注关联配置。发现同区域有本 Skill 旧版本注释时，按目标目录规则先让用户明确版本处理方式。
+遵循用户授权改动源码，一次聚焦一组可验证的变化。对被修改代码留下简短 `uni-mp-analy 2.1.0` 注释，沿用语言原生注释格式；严格 JSON 不插入非法注释，可在相邻被改动的脚本标注关联配置。发现同区域有本 Skill 旧版本注释时，按目标目录规则先让用户明确版本处理方式。
 
 ### 5. 重建与对比
 

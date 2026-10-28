@@ -1,0 +1,52 @@
+{
+  "applicationVersion": "2.01.2510290",
+  "component": "code-analyse-viewer",
+  "changes": [
+    "Removed sourceMappingURL comments; added uni-mp-analy 2.1.0 provenance comment.",
+    "Escaped HTML label text in dependency graph functions S and N; layout and size redistribution unchanged."
+  ],
+  "files": [
+    {
+      "file": "runtime-main.df55298d.js",
+      "originalSha256": "508aa8d8ac21b88fa44501d5aa4df7e476ad3d1753fa8fc179d8993d2a8f38cb",
+      "bundledSha256": "a3db8a824b7bed45e386f9498bec80d508e18c3abf13f819e020fa6b93c4f4f4"
+    },
+    {
+      "file": "4.87840d10.chunk.js",
+      "originalSha256": "348ae9b98910f368a7c97cfc394aff5c7d741c6e99af5eebb1e39af054826c24",
+      "bundledSha256": "94ec3d89d51380c4e6a2f3657fdbee25ed2f5ec19287680bc7c9847b32ed5fcd"
+    },
+    {
+      "file": "2.821b8fc2.chunk.js",
+      "originalSha256": "ee75a9992b3e0999f6cd8618bf3990812b056eb2245830ead3fb282c8ea2dad6",
+      "bundledSha256": "0d1c474024af6ec96f65ee8b6c3d2a89f7d2aacfd26ab20c87a5567239963af3"
+    },
+    {
+      "file": "3.732d043f.chunk.js",
+      "originalSha256": "9ea528011ade86cd4b83ca175676255257263b69ee52705d7cff3cdef761f1ef",
+      "bundledSha256": "c896c22b33286de2abe7077c75290be0323ec1f5657b9f6de37a69e1b8900d29"
+    },
+    {
+      "file": "5.11e9b38e.chunk.js",
+      "originalSha256": "407a9bf95119e874ec57677c40e54cf302686339de5a2cad7954ea9205f0497f",
+      "bundledSha256": "00dd262b6414600351760d7da6a84c9e38a64ef5bdb1d83a15d11903227a9469"
+    },
+    {
+      "file": "main.00ccb7d3.chunk.js",
+      "originalSha256": "52836e217776e7340c7358c5f900436d7ab3dea2590af4e7b9ff44f3a5cdf7c9",
+      "bundledSha256": "9909d6ea4912626e02ca35173de48bdf2d8a4869c43c04ece5248f97bfad7a1d"
+    },
+    {
+      "file": "3.34d864d7.chunk.css",
+      "originalSha256": "7a37794c3a3371ef529cc624baf135fb574121a219905be58c9fa7ee1915f048",
+      "bundledSha256": "a2e0bcd31bacf6f7ef85e57c4c43acab385d4c739a3d6807fc5fe6b1fc096447"
+    },
+    {
+      "file": "5.cbcae797.chunk.css",
+      "originalSha256": "e6ca895cc923cfecddd95d063fc067c34a4fa1c611475085cbb337b01429ef65",
+      "bundledSha256": "01cd2e5122b23024321b44fc0fcfadba59cb2332956af8f434db4cb4904ea793"
+    }
+  ],
+  "bundledHashEncoding": "UTF-8 with LF line endings",
+  "sourceRelativePath": "js/libs/vseditor/extensions/code-analyse-viewer/viewer"
+}
