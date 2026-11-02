@@ -1,0 +1,102 @@
+<!doctype html>
+<!-- tune-ink-gap 1.2.0：采集链路演示。 -->
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ink Gap · 设备测量</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f4f4ef; color: #1b2924; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; }
+    main { max-width: 820px; margin: auto; padding: 48px 24px 36px; }
+    .eyebrow { margin: 0 0 18px; color: #53695e; font-size: 12px; letter-spacing: .16em; }
+    h1 { margin: 0; font-size: clamp(32px, 7vw, 48px); letter-spacing: -.04em; line-height: 1.15; }
+    .intro { max-width: 580px; margin: 18px 0 28px; color: #5b665f; font-size: 15px; line-height: 1.8; }
+    .card { margin-top: 16px; padding: 28px; background: #fff; border: 1px solid #dedfd7; border-radius: 18px; }
+    .section-title { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; margin-bottom: 24px; }
+    .section-title h2 { font-size: 14px; margin: 0; }
+    .section-title span { color: #6c766f; font-size: 12px; }
+    .sample-title { margin: 0 0 20px; font-size: 16px; font-weight: 600; line-height: 24px; }
+    .sample-surface { min-height: 130px; display: grid; place-items: center; border-radius: 10px; background: #e5eee6; color: #55705f; font-size: 13px; letter-spacing: .04em; }
+    .sample-note { margin: 18px 0 0; font-size: 12px; line-height: 1.7; color: #748077; }
+    .controls { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; }
+    label { flex: 1; min-width: 150px; color: #536057; font-size: 12px; }
+    input { display: block; width: 100%; margin-top: 8px; padding: 12px; border: 1px solid #cdd4cb; border-radius: 8px; background: #fff; color: #203b2a; font: inherit; font-size: 14px; }
+    button { min-height: 43px; padding: 12px 18px; border: 0; border-radius: 8px; background: #24553e; color: #fff; font: inherit; font-size: 14px; cursor: pointer; }
+    button:disabled { opacity: .6; cursor: wait; }
+    input:focus-visible, button:focus-visible { outline: 3px solid #b2ceb5; outline-offset: 3px; }
+    #status { margin: 18px 0 0; color: #376344; font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
+    #status[data-error="true"] { color: #a33323; }
+    dl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 24px 0 0; }
+    dl[hidden] { display: none; }
+    dl div { padding: 16px; border-radius: 10px; background: #f4f6f0; }
+    dt { font-size: 11px; color: #657367; }
+    dd { margin: 10px 0 0; font-size: 26px; font-variant-numeric: tabular-nums; }
+    dd small { font-size: 12px; color: #708071; }
+    footer { padding: 20px 2px; color: #748077; font-size: 12px; line-height: 1.8; }
+    @media (max-width: 480px) { main { padding: 30px 16px; } .card { padding: 20px; } dl { gap: 6px; } dl div { padding: 12px 8px; } dd { font-size: 23px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">INK GAP / DEVICE MEASUREMENT</p>
+    <h1>让间距，从这台设备出发。</h1>
+    <p class="intro">页面打开后，会自动测量下面的文字示例，并把结果保存到电脑。你也可以填写设备备注后重新上报。</p>
+    <section class="card" aria-labelledby="sample-heading">
+      <div class="section-title"><h2 id="sample-heading">文字与相邻元素</h2><span>目标可见间距 20px</span></div>
+      <p class="sample-title">在真实字体环境里，观察文字留白</p>
+      <div class="sample-surface">相邻元素示例</div>
+      <p class="sample-note">当前文字盒与色块之间设置了 20px 的 margin。单侧留白和建议盒间距是估算值，最终仍需对照设计稿。</p>
+    </section>
+    <section class="card" aria-labelledby="report-heading">
+      <div class="section-title"><h2 id="report-heading">本设备结果</h2><span>自动回传</span></div>
+      <div class="controls">
+        <label for="device-label">设备备注（选填）<input id="device-label" maxlength="100" placeholder="例如：iPhone / Safari"></label>
+        <button id="report-button" type="button">重新测量并上报</button>
+      </div>
+      <p id="status" role="status" aria-live="polite">等待测量…</p>
+      <dl id="metrics" hidden>
+        <div><dt>实测单行盒高</dt><dd><span id="line-height"></span><small> px</small></dd></div>
+        <div><dt>单侧估算留白</dt><dd><span id="blank"></span><small> px</small></dd></div>
+        <div><dt>建议盒间距</dt><dd><span id="gap"></span><small> px</small></dd></div>
+      </dl>
+    </section>
+    <footer>本页用于验证测量与回传链路。业务页面需要接入相同脚本并定位实际元素；本页结果不能替代业务页面实测。</footer>
+  </main>
+  <script src="/measure.js"></script>
+  <script>
+    // tune-ink-gap 1.2.0：只有服务确认保存后，才显示成功。
+    const session = __INK_SESSION_JSON__;
+    const button = document.getElementById("report-button");
+    const status = document.getElementById("status");
+    async function report() {
+      button.disabled = true;
+      status.dataset.error = "false";
+      status.textContent = "正在测量并保存到电脑…";
+      document.getElementById("metrics").hidden = true;
+      try {
+        const result = await TuneInkGap.run({
+          endpoint: "/report", session,
+          deviceLabel: document.getElementById("device-label").value,
+          pairs: [{ text: ".sample-title", next: ".sample-surface", targetGap: 20 }]
+        });
+        const measurement = result.measurements[0];
+        document.getElementById("line-height").textContent = Number(measurement.font.singleLineBoxHeight.toFixed(2));
+        document.getElementById("blank").textContent = Number(measurement.font.estimatedBlank.toFixed(2));
+        document.getElementById("gap").textContent = Number(measurement.suggestedBoxGap.toFixed(2));
+        document.getElementById("metrics").hidden = false;
+        status.textContent = "已保存到电脑 · " + new Date(result.receivedAt).toLocaleTimeString();
+      } catch (error) {
+        status.dataset.error = "true";
+        status.textContent = "未完成测量：" + error.message +
+          (error.diagnosticSaved ? "；诊断已回传到电脑。" : "") +
+          (error.diagnosticUploadError ? "；诊断回传失败：" + error.diagnosticUploadError : "");
+      } finally {
+        button.disabled = false;
+      }
+    }
+    button.addEventListener("click", report);
+    report();
+  </script>
+</body>
+</html>
