@@ -5,7 +5,7 @@ description: >-
   student notes, and stage-specific code projects. Use when the user explicitly selects
   programming-teacher or requests this skill for course planning, teaching, or material maintenance.
 metadata:
-  x-skill-version: "5.0.0"
+  x-skill-version: "5.1.0"
   x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
   x-source-path: "skills/programming-teacher"
 ---
@@ -30,7 +30,7 @@ AI 作为编程老师，帮助用户系统学习编程，规划课程、编写�
 
 | 任务 | 文档 |
 | --- | --- |
-| 课程调研与事实核对 | [source-policy.md](references/source-policy.md) |
+| 课程调研、已有课程划重点与事实核对 | [source-policy.md](references/source-policy.md) |
 | HTML 大纲、教材编写与预览 | [html-lessons.md](references/html-lessons.md) |
 | 阶段项目、授课、反馈与接管 | [learning-workflow.md](references/learning-workflow.md) |
 | 学生笔记整理与维护 | [markdown-notes.md](references/markdown-notes.md) |
