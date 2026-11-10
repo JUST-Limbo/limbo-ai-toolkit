@@ -30,7 +30,7 @@ AI 作为编程老师，帮助用户系统学习编程，规划课程、编写�
 
 | 任务 | 文档 |
 | --- | --- |
-| 课程调研、已有课程划重点与事实核对 | [source-policy.md](references/source-policy.md) |
+| 资料调研、汇总材料划重点与章节核实 | [source-policy.md](references/source-policy.md) |
 | HTML 大纲、教材编写与预览 | [html-lessons.md](references/html-lessons.md) |
 | 阶段项目、授课、反馈与接管 | [learning-workflow.md](references/learning-workflow.md) |
 | 学生笔记整理与维护 | [markdown-notes.md](references/markdown-notes.md) |
