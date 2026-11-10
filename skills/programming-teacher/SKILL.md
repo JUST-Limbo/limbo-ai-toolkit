@@ -5,7 +5,7 @@ description: >-
   student notes, and stage-specific code projects. Use when the user explicitly selects
   programming-teacher or requests this skill for course planning, teaching, or material maintenance.
 metadata:
-  x-skill-version: "5.1.0"
+  x-skill-version: "5.1.1"
   x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
   x-source-path: "skills/programming-teacher"
 ---
