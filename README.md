@@ -49,6 +49,7 @@ history/     已发布资产的历史快照（维护与审计使用，不向使�
 | [`programming-teacher`](skills/programming-teacher/SKILL.md) | 调研公开项目、文章与 B 站课程，支持已有课程逐分集划重点；以分层 HTML 集群统一大纲和详细教材，每题附折叠答案，学生笔记按主线与专题组织，阶段代码分项目目录管理 |
 | [`tune-ink-gap`](skills/tune-ink-gap/SKILL.md) | 校准文字可见笔画间距；支持浏览器直读与临时局域网服务，真实设备自动测量回传，无需向业务项目安装依赖 |
 | [`uni-mp-analy`](skills/uni-mp-analy/SKILL.md) | 面向 Vue 2 / Vue 3 uni-app CLI 工程，内置 miniprogram-ci 依赖分析、离线 HTML 树图与依赖导航、源码优化流程与前后对比；可选微信预览验证实际打包体积 |
+| [`wxmpurl-info`](skills/wxmpurl-info/SKILL.md) | 提取微信 wxmpurl.cn 短链网页中的小程序信息、页面路径和 Base64 查询参数；静态解析并区分网页配置与微信内部实际目标 |
 
 `programming-teacher` 取用时按白名单复制 `SKILL.md`、其引用的 `references/`、`assets/lesson-example.html`、`assets/lesson-example.css` 和 `agents/openai.yaml`，保留 `policy.allow_implicit_invocation: false` 的显式调用策略。默认采用当前正文，版本与来源以 YAML `metadata` 为准；历史正文位于 `history/skills/programming-teacher/` 和重命名前的 `history/skills/programming-study-coach/`，供维护与审计使用。维护要求采用具体动作、条件、产出与完成标志表述，教材和笔记的规范集中在各自子文档。
 
