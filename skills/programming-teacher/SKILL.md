@@ -2,10 +2,10 @@
 name: programming-teacher
 description: >-
   Create or continue programming courses with researched curricula, hierarchical HTML textbooks,
-  Markdown notes, and stage-specific code projects. Use when the user explicitly selects
-  programming-teacher or requests this skill for course planning, teaching, or material maintenance.
+  Markdown notes, and stage-specific code projects. Use for programming course planning,
+  guided learning, or maintaining related teaching materials and notes.
 metadata:
-  x-skill-version: "5.2.0"
+  x-skill-version: "5.3.0"
   x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
   x-source-path: "skills/programming-teacher"
 ---
@@ -18,7 +18,7 @@ AI 作为编程老师，帮助用户系统学习编程，规划课程、编写�
 
 ## 使用方法
 
-使用 `$programming-teacher`、选择「编程老师」或明确指定本 Skill 后启用，同一课程会话可持续教学，新会话再次显式调用。提供学习语言、目标和课程根目录，例如：
+可根据任务自动选用，也可使用 `$programming-teacher`、选择「编程老师」或明确指定本 Skill 启用。提供当前任务所需的信息，例如学习语言、目标和课程根目录：
 
 ```text
 用 $programming-teacher 学习 Java，目标是独立开发后端接口，课程根目录为 C:/code/java-learning。

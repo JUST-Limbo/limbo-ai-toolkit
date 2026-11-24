@@ -1,40 +1,17 @@
 # Limbo AI Toolkit
 
-面向 Codex、Claude Code、Cursor、GitHub Copilot 及其他 AI Coding Agents 的可复用工程资产库，集中维护 **Agent Skills、AI Agent Rules、MCP Servers、Git 工作流与前端图片优化工具**。
+## 项目结构
 
-> Reusable AI agent toolkit with Agent Skills, coding rules, MCP servers, Git workflows, and frontend/image optimization utilities.
+提供可复用于其他项目或 AI 客户端的工程资产：
 
-## 项目定位
+| 类型 | 目录 | 用途 |
+| --- | --- | --- |
+| Skills | `skills/` | 封装任务与操作流程 |
+| Rules | `rules/` | 约定编码和 Agent 行为 |
+| MCP | `mcp/` | 为 AI 客户端提供工具 |
+| 历史快照 | `history/` | 保留已发布版本，供维护与审计使用 |
 
-本仓库用于沉淀可以复制到其它项目或接入 AI 客户端的工程资产，而不是通用提示词合集：
-
-- **Agent Skills**：封装可重复执行的开发任务与操作流程。
-- **AI Agent Rules**：约束编码风格、Git 流程和 Agent 行为。
-- **MCP Servers**：通过 Model Context Protocol 为 AI 客户端提供本地工具。
-
-不同资产的适用工具和安装位置可能不同，应以对应文档为准：
-
-| 资产类型 | 适用范围 |
-|---------|---------|
-| Skills | Codex、Claude Code 或支持相应 Skill 格式的 Agent |
-| Rules | Cursor、Claude Code、GitHub Copilot 等支持项目规则的 AI 编码工具 |
-| MCP | 支持 stdio MCP Server 的客户端或 Agent |
-
-## 快速开始
-
-1. 从下方「对外资产清单」选择需要的 Skill、Rule 或 MCP。
-2. 打开对应文档，确认功能范围、版本和客户端要求。
-3. 按白名单取用：Skill 只复制 `SKILL.md` 及其明确依赖，Rule 只复制指定规则文件并保留 YAML 与通用 `metadata`，按目标工具补充加载字段；MCP 只复制对应 README 指定的构建产物。
-4. 按目标 AI 工具的目录和配置规则安装；不要把 `history/` 当作当前版本分发。
-
-## 目录一览
-
-```text
-skills/      可复用 Agent Skills（每个一目录，仅放当前版本及其运行依赖）
-rules/       可复用 AI Agent Rules（编码规约、流程约束等当前版本）
-mcp/         可复用 MCP Servers（每个一子目录：package.json + README）
-history/     已发布资产的历史快照（维护与审计使用，不向使用侧分发）
-```
+按目标 AI 工具的目录和配置规则安装；不要把 `history/` 当作当前版本分发。
 
 ## 对外资产清单
 
@@ -42,38 +19,30 @@ history/     已发布资产的历史快照（维护与审计使用，不向使�
 
 | 名称 | 说明 |
 |------|------|
-| [`generate-color-palette`](skills/generate-color-palette/SKILL.md) | 扫描前端源码中的 hex / rgb / oklch 颜色值，去重后按色谱分组，生成交互式 HTML 色板（搜索、Tab 筛选、点击复制） |
-| [`git-branch-merge-flow`](skills/git-branch-merge-flow/SKILL.md) | 将当前分支按固定流程同步到目标分支：`fetch` → 对齐 `origin/*` → `push` → checkout 目标 → merge `origin/<当前>` → 推送；冲突时停在当前阶段分支 |
-| [`task-journey`](skills/task-journey/SKILL.md) | 评估长时间、多阶段任务是否需要持久状态，征得用户同意后维护可验证的里程碑计划、进度与路线调整，并支持有界子 Agent 委派、跨会话恢复、接管和自动发现探针 |
-| [`picture-formats`](skills/picture-formats/SKILL.md) | 同源并行导出 AVIF/WebP/JPEG（或 PNG），用 `<picture>` 让浏览器只下载一种；含 Vue 实践、透明兜底、Network 排错与 tinypng-mcp 素材准备 |
-| [`programming-teacher`](skills/programming-teacher/SKILL.md) | 调研公开项目、文章与 B 站课程，支持已有课程逐分集划重点；以分层 HTML 集群统一大纲和详细教材，每题附折叠答案，Markdown 笔记按主线与专题组织，阶段代码分项目目录管理 |
-| [`tune-ink-gap`](skills/tune-ink-gap/SKILL.md) | 校准文字可见笔画间距；支持浏览器直读与临时局域网服务，真实设备自动测量回传，无需向业务项目安装依赖 |
-| [`uni-mp-analy`](skills/uni-mp-analy/SKILL.md) | 面向 Vue 2 / Vue 3 uni-app CLI 工程，内置 miniprogram-ci 依赖分析、离线 HTML 树图与依赖导航、源码优化流程与前后对比；可选微信预览验证实际打包体积 |
-| [`wxmpurl-info`](skills/wxmpurl-info/SKILL.md) | 提取微信 wxmpurl.cn 短链网页中的小程序信息、页面路径和 Base64 查询参数；静态解析并区分网页配置与微信内部实际目标 |
-
-`programming-teacher` 取用时按白名单复制 `SKILL.md`、其引用的 `references/`、`assets/lesson-example.html`、`assets/lesson-example.css` 和 `agents/openai.yaml`，保留 `policy.allow_implicit_invocation: false` 的显式调用策略。默认采用当前正文，版本与来源以 YAML `metadata` 为准；历史正文位于 `history/skills/programming-teacher/` 和重命名前的 `history/skills/programming-study-coach/`，供维护与审计使用。维护要求采用具体动作、条件、产出与完成标志表述，教材和笔记的规范集中在各自子文档。
+| [`generate-color-palette`](skills/generate-color-palette/SKILL.md) | 扫描前端源码颜色，生成可搜索、筛选和复制的 HTML 色板 |
+| [`git-branch-merge-flow`](skills/git-branch-merge-flow/SKILL.md) | 同步当前分支，合并到目标分支并推送 |
+| [`task-journey`](skills/task-journey/SKILL.md) | 维护长期任务的计划与进度，支持跨会话恢复和接管 |
+| [`picture-formats`](skills/picture-formats/SKILL.md) | 导出多种图片格式，通过 `<picture>` 按浏览器支持情况加载 |
+| [`programming-teacher`](skills/programming-teacher/SKILL.md) | 规划编程课程、编写 HTML 教材、开展教学并维护 Markdown 笔记 |
+| [`tune-ink-gap`](skills/tune-ink-gap/SKILL.md) | 测量并校准文字可见笔画间距，支持真实设备验证 |
+| [`uni-mp-analy`](skills/uni-mp-analy/SKILL.md) | 分析 Vue 2 / Vue 3 uni-app 小程序依赖，辅助优化打包体积 |
+| [`wxmpurl-info`](skills/wxmpurl-info/SKILL.md) | 解析 wxmpurl.cn 短链中的小程序信息、页面路径和参数 |
 
 ### Rules
 
 | 名称 | 作用域 | 说明 |
 |------|--------|------|
-| [`agent-global-baseline`](rules/agent-global-baseline.md) | 全局 | 跨项目 Agent 基线（简体中文、代码原则、目录预检查、Git 临时 proxy 等） |
-| [`style-reference-clarify`](rules/style-reference-clarify.md) | 全局 | 参考某处样式实现另一处时，先读参考源、一轮多选确认必抄样式点后再改代码 |
+| [`agent-global-baseline`](rules/agent-global-baseline.md) | 全局 | 统一语言、编码、目录检查和 Git 操作约定 |
+| [`style-reference-clarify`](rules/style-reference-clarify.md) | 全局 | 参考已有样式时，先确认复用范围再修改代码 |
 
 ### MCP
 
 | 名称 | 说明 |
 |------|------|
-| [`tinypng-mcp`](mcp/tinypng-mcp/README.md) | 通过 TinyPNG 官方 API 压缩或转换 PNG/JPG/WebP/AVIF；MCP Tools + CLI；须 `TINIFY_API_KEY` |
-| [`tinypng-web-mcp`](mcp/tinypng-web-mcp/README.md) | 走官网 Web 后台免 Key 压缩 PNG/JPG；不稳定，仅建议学习；使用前阅读对应免责声明 |
-| [`sharp-image-mcp`](mcp/sharp-image-mcp/README.md) | 本地并行输出 JPEG/PNG/WebP/AVIF，可调画质；可生成交互式前后画质对比 HTML |
-
-功能详情与版本信息：Skill 见各 `SKILL.md` 及其引用文档；Rule 见 [rules/README.md](rules/README.md)；MCP 见 [mcp/README.md](mcp/README.md)。来源 / 实现参考标注见 [AGENTS.md](AGENTS.md#实现参考标注readme--正文)。
+| [`tinypng-mcp`](mcp/tinypng-mcp/README.md) | 通过 TinyPNG 官方 API 压缩和转换图片，需 API Key |
+| [`tinypng-web-mcp`](mcp/tinypng-web-mcp/README.md) | 通过 TinyPNG 网页压缩图片，免 Key，仅建议学习 |
+| [`sharp-image-mcp`](mcp/sharp-image-mcp/README.md) | 本地图片格式转换、画质调整与效果对比 |
 
 ## License
 
 本仓库代码与文档采用 [MIT License](LICENSE)。涉及 TinyPNG 等第三方服务的资产，还需遵守对应服务条款及资产目录中的免责声明。
-
----
-
-维护约定（含资产分类、版本规则、目录结构）见 [AGENTS.md](AGENTS.md)。
