@@ -5,7 +5,7 @@ description: >-
   Markdown notes, and code example projects. Use for programming course planning,
   guided learning, or maintaining related teaching materials and notes.
 metadata:
-  x-skill-version: "6.0.0"
+  x-skill-version: "6.1.0"
   x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
   x-source-path: "skills/programming-teacher"
 ---
@@ -26,16 +26,18 @@ AI 作为编程老师，帮助用户系统学习编程，规划课程、编写�
 
 ## 启动流程
 
-各子文档的规范可按任务单独使用。仅整理笔记、编写教材或调研资料时，直接采用对应规范，无需启动完整教学流程；共用的目录约定仍以本文件为准。
+按当前请求选择任务，各项可独立执行。只读取相关规则和材料，沿用已有信息；仅询问影响本次任务的缺项，不要求每次都提供课程目标、学习基础和根目录。
 
-1. 识别本轮任务：新建课程、继续学习、答疑排错，或维护已有材料。
-2. 从当前请求与已有对话中确认学习目标、已有基础和课程根目录；已有信息直接沿用，只询问影响当前任务的缺项。
-3. 检查目标目录适用的规则，按任务读取相关大纲、教材、笔记或项目源码，确认实际目录布局与必要上下文；继续学习时确认学习位置，不凭材料已存在就判断用户已掌握。
-4. 按任务读取对应规范并执行：
-   - 新建课程：按 [课程调研规范](references/source-policy.md) 调研与筛选材料，再按 [HTML 教材规范](references/html-lessons.md) 组织大纲和教材。
-   - 继续学习：按 [围绕课件开展课堂](references/learning-workflow.md#围绕课件开展课堂) 开展教学。
-   - 答疑排错：结合用户问题与相关代码，按 [教学工作流程](references/learning-workflow.md) 提供解释与反馈。
-   - 维护材料：读取对应的教材、笔记或来源规范，只处理本次要求涉及的范围。
+| 任务 | 执行范围 |
+| --- | --- |
+| 答疑 | 直接解释问题，按需读取相关代码或查阅资料；不默认启动课堂、考核或修改材料 |
+| 维护笔记 | 按 [笔记规范](references/markdown-notes.md) 读取并修改对应主题 |
+| 编写教材 | 按 [教材规范](references/html-lessons.md) 处理指定章节，按需补充相关资料 |
+| 规划课程或调研资料 | 按 [课程调研规范](references/source-policy.md) 筛选资料；规划课程时参考 [课程目标](references/learning-workflow.md#课程目标)，仅按请求产出路线或教材 |
+
+用户要求开始授课或继续授课时，才采用 [课堂流程](references/learning-workflow.md#围绕课件开展课堂)。不凭材料已存在就认定用户已掌握；教材、笔记和代码仅在用户要求维护时修改。
+
+工程模板只在初始化或修改工程时读取，日常写作读取相关正文和必要导航配置，不通读模板、依赖目录或构建产物。
 
 ## 材料存放位置
 
@@ -43,7 +45,9 @@ AI 作为编程老师，帮助用户系统学习编程，规划课程、编写�
 
 | 内容 | 默认位置 | 对应规范 |
 | --- | --- | --- |
-| 大纲、HTML 教材及共用样式、图示等资源 | `.learning/lessons/`，共享资源放在其 `assets/` 子目录 | [HTML 教材规范](references/html-lessons.md) |
+| 大纲与教材工程 | `.learning/lessons/`，正文为 Markdown，主题与组件位于 `.vitepress/` | [HTML 教材规范](references/html-lessons.md) |
 | Markdown 笔记 | `.learning/notes/` | [Markdown 笔记规范](references/markdown-notes.md) |
 | 资料来源记录 | `.learning/resources/` | [课程调研规范](references/source-policy.md) |
 | 代码项目、授课、反馈与接管 | `projects/<项目名>/` | [教学工作流程](references/learning-workflow.md) |
+
+新教材使用 [VitePress 工程模板](assets/textbook-template/package.json) 初始化。已有教材或工程按用户要求维护，不自动迁移或覆盖。模板的取用和运行见 [模板使用](references/html-lessons.md#模板使用)。
