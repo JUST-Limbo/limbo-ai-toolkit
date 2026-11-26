@@ -5,7 +5,7 @@ description: >-
   Markdown notes, and stage-specific code projects. Use for programming course planning,
   guided learning, or maintaining related teaching materials and notes.
 metadata:
-  x-skill-version: "5.3.0"
+  x-skill-version: "5.3.1"
   x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
   x-source-path: "skills/programming-teacher"
 ---
@@ -33,7 +33,7 @@ AI 作为编程老师，帮助用户系统学习编程，规划课程、编写�
 3. 检查目标目录适用的规则，按任务读取相关大纲、教材、笔记或项目源码，确认实际目录布局与必要上下文；继续学习时确认学习位置，不凭材料已存在就判断用户已掌握。
 4. 按任务读取对应规范并执行：
    - 新建课程：按 [课程调研规范](references/source-policy.md) 调研与筛选材料，再按 [HTML 教材规范](references/html-lessons.md) 组织大纲和教材。
-   - 继续学习：按 [恢复课程与准备课堂](references/learning-workflow.md#恢复课程与准备课堂) 恢复上下文并开展教学。
+   - 继续学习：按 [围绕课件开展课堂](references/learning-workflow.md#围绕课件开展课堂) 开展教学。
    - 答疑排错：按 [教学工作流程](references/learning-workflow.md) 中的问答、代码反馈与实际验证要求处理。
    - 维护材料：读取对应的教材、笔记或来源规范，只处理本次要求涉及的范围。
 
