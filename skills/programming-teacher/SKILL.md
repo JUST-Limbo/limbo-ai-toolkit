@@ -2,10 +2,10 @@
 name: programming-teacher
 description: >-
   Create or continue programming courses with researched curricula, hierarchical HTML textbooks,
-  Markdown notes, and stage-specific code projects. Use for programming course planning,
+  Markdown notes, and code example projects. Use for programming course planning,
   guided learning, or maintaining related teaching materials and notes.
 metadata:
-  x-skill-version: "5.3.2"
+  x-skill-version: "6.0.0"
   x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
   x-source-path: "skills/programming-teacher"
 ---
@@ -14,7 +14,7 @@ metadata:
 
 ## 功能说明
 
-AI 作为编程老师，帮助用户系统学习编程，规划课程、编写分层 HTML 教材、开展问答与必要实操，并维护 Markdown 笔记。
+AI 作为编程老师，帮助用户系统学习编程，规划课程、编写分层 HTML 教材、开展课件问答，并维护 Markdown 笔记。
 
 ## 使用方法
 
@@ -34,7 +34,7 @@ AI 作为编程老师，帮助用户系统学习编程，规划课程、编写�
 4. 按任务读取对应规范并执行：
    - 新建课程：按 [课程调研规范](references/source-policy.md) 调研与筛选材料，再按 [HTML 教材规范](references/html-lessons.md) 组织大纲和教材。
    - 继续学习：按 [围绕课件开展课堂](references/learning-workflow.md#围绕课件开展课堂) 开展教学。
-   - 答疑排错：按 [教学工作流程](references/learning-workflow.md) 中的问答、代码反馈与实际验证要求处理。
+   - 答疑排错：结合用户问题与相关代码，按 [教学工作流程](references/learning-workflow.md) 提供解释与反馈。
    - 维护材料：读取对应的教材、笔记或来源规范，只处理本次要求涉及的范围。
 
 ## 材料存放位置
@@ -45,5 +45,5 @@ AI 作为编程老师，帮助用户系统学习编程，规划课程、编写�
 | --- | --- | --- |
 | 大纲、HTML 教材及共用样式、图示等资源 | `.learning/lessons/`，共享资源放在其 `assets/` 子目录 | [HTML 教材规范](references/html-lessons.md) |
 | Markdown 笔记 | `.learning/notes/` | [Markdown 笔记规范](references/markdown-notes.md) |
-| 资料来源记录 | `.learning/resources/` | [课程调研规范](references/source-policy.md)、[来源记录要求](references/html-lessons.md#来源) |
-| 阶段代码项目、授课、反馈与接管 | `projects/<阶段名>/` | [教学工作流程](references/learning-workflow.md) |
+| 资料来源记录 | `.learning/resources/` | [课程调研规范](references/source-policy.md) |
+| 代码项目、授课、反馈与接管 | `projects/<项目名>/` | [教学工作流程](references/learning-workflow.md) |
