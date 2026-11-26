@@ -5,7 +5,7 @@ description: >-
   Markdown notes, and stage-specific code projects. Use for programming course planning,
   guided learning, or maintaining related teaching materials and notes.
 metadata:
-  x-skill-version: "5.3.1"
+  x-skill-version: "5.3.2"
   x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
   x-source-path: "skills/programming-teacher"
 ---

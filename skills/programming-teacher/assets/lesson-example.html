@@ -104,20 +104,20 @@ console.log(result); <span class="comment">// 打印 undefined</span></code></pr
       <div class="check" id="检查-预测">
         <h3>问题一 · 预测结果</h3>
         <p><code>const amount = calculateTotal(12, 4);</code> 执行后，<code>amount</code> 是什么？计算过程中，两个实参分别对应哪个形参？</p>
-        <p class="prompt">请先作答，再展开参考答案对照。</p>
-        <details><summary>展开参考答案</summary><p><code>amount</code> 是 <code>48</code>。实参 <code>12</code> 对应 <code>price</code>，实参 <code>4</code> 对应 <code>quantity</code>，函数将乘积返回给调用方。</p></details>
+        <p class="prompt">请先作答，再对照参考答案。</p>
+        <details open><summary>参考答案</summary><p><code>amount</code> 是 <code>48</code>。实参 <code>12</code> 对应 <code>price</code>，实参 <code>4</code> 对应 <code>quantity</code>，函数将乘积返回给调用方。</p></details>
       </div>
       <div class="check" id="检查-返回">
         <h3>问题二 · 解释行为</h3>
         <p><code>showTotal</code> 已经打印了总价，为什么赋值给 <code>result</code> 后仍得到 <code>undefined</code>？应如何让调用方取得总价？</p>
-        <p class="prompt">请先作答，再展开参考答案对照。</p>
-        <details><summary>展开参考答案</summary><p>打印只产生控制台输出。函数没有显式返回总价，因此调用结果是 <code>undefined</code>。将函数体改为 <code>return price * quantity;</code>，调用方即可取得并继续使用这个数值。</p></details>
+        <p class="prompt">请先作答，再对照参考答案。</p>
+        <details open><summary>参考答案</summary><p>打印只产生控制台输出。函数没有显式返回总价，因此调用结果是 <code>undefined</code>。将函数体改为 <code>return price * quantity;</code>，调用方即可取得并继续使用这个数值。</p></details>
       </div>
       <div class="check" id="检查-边界">
         <h3>问题三 · 追踪执行路径</h3>
         <p>在“提前返回”的版本中，调用 <code>calculateTotal(20, 0)</code> 时执行了哪个 <code>return</code>？最后一行会执行吗？</p>
-        <p class="prompt">请先作答，再展开参考答案对照。</p>
-        <details><summary>展开参考答案</summary><p>条件 <code>quantity === 0</code> 成立，执行分支内的 <code>return 0;</code>，返回 <code>0</code> 并结束调用。最后一行不会执行。</p></details>
+        <p class="prompt">请先作答，再对照参考答案。</p>
+        <details open><summary>参考答案</summary><p>条件 <code>quantity === 0</code> 成立，执行分支内的 <code>return 0;</code>，返回 <code>0</code> 并结束调用。最后一行不会执行。</p></details>
       </div>
     </section>
 
