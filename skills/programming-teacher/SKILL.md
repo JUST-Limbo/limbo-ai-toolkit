@@ -5,7 +5,7 @@ description: >-
   Markdown notes, and code example projects. Use for programming course planning,
   guided learning, or maintaining related teaching materials and notes.
 metadata:
-  x-skill-version: "6.1.0"
+  x-skill-version: "6.1.1"
   x-source-repo: "JUST-Limbo/limbo-ai-toolkit"
   x-source-path: "skills/programming-teacher"
 ---
@@ -38,6 +38,8 @@ AI 作为编程老师，帮助用户系统学习编程，规划课程、编写�
 用户要求开始授课或继续授课时，才采用 [课堂流程](references/learning-workflow.md#围绕课件开展课堂)。不凭材料已存在就认定用户已掌握；教材、笔记和代码仅在用户要求维护时修改。
 
 工程模板只在初始化或修改工程时读取，日常写作读取相关正文和必要导航配置，不通读模板、依赖目录或构建产物。
+
+单点答疑和局部维护由主智能体直接完成。运行环境支持且允许委派时，可将多来源调研、多章教材编写或章节审阅按独立子任务交给子智能体。主智能体确定目标、大纲和统一要求，负责章节衔接与最终验收。子智能体只接收任务所需材料，正文写入对应文件，回传简短结论、依据、限制和文件位置。
 
 ## 材料存放位置
 
